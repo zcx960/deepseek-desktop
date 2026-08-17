@@ -214,7 +214,7 @@ function applicationOptions(input: {
 describe('desktop application composition', () => {
   it.each([
     { platform: 'darwin' as const, chromeBounds: { x: 88, y: 6, width: 164, height: 32 } },
-    { platform: 'win32' as const, chromeBounds: { x: 88, y: 6, width: 164, height: 32 } },
+    { platform: 'win32' as const, chromeBounds: { x: 72, y: 6, width: 164, height: 32 } },
   ])('keeps $platform Harness full-height and chrome inside the title bar', async ({ platform, chromeBounds }) => {
     const filename = await stateFile()
     const window = new FakeWindow()

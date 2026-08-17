@@ -6,7 +6,7 @@ import type { DesktopChromeSurface } from './shell-protocol.ts'
 const CHROME_TOP = 6
 const CHROME_INLINE_INSET = 12
 const CHROME_INLINE_INSET_MACOS = 88
-const CHROME_INLINE_INSET_WINDOWS = 88
+const CHROME_INLINE_INSET_WINDOWS = 72
 const CHROME_CONTROL_HEIGHT = 32
 const CHROME_SWITCH_WIDTH = 164
 const CHROME_CHAT_ACTION_GAP = 4
