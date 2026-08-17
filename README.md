@@ -3,7 +3,7 @@
 
   <h1>DeepSeek Desktop</h1>
 
-  <p>原生桌面应用，将 DeepSeek 官方 Chat 网页与本地智能体工作区整合到一个窗口中。</p>
+  <p>原生桌面应用，将 DeepSeek 官方 Chat 功能与官方harness功能整合到一个窗口中。</p>
 
   <p>
     <img src="https://img.shields.io/badge/Platform-macOS%20arm64%20%7C%20Windows%20x64-0f766e?style=flat-square" alt="平台：macOS arm64 和 Windows x64" />
