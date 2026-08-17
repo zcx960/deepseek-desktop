@@ -1,106 +1,106 @@
 <div align="center">
-  <img src="./apps/desktop/build/icon.png" alt="DeepSeek Desktop icon" width="112" />
+  <img src="./apps/desktop/build/icon.png" alt="DeepSeek Desktop 图标" width="112" />
 
   <h1>DeepSeek Desktop</h1>
 
-  <p>A native desktop client that combines official DeepSeek Chat and Harness capabilities in one window.</p>
+  <p>原生桌面应用，将 DeepSeek 官方 Chat 功能与官方harness功能整合到一个窗口中。</p>
 
   <p>
-    <img src="https://img.shields.io/badge/Platform-macOS%20arm64%20%7C%20Windows%20x64-0f766e?style=flat-square" alt="Platform: macOS arm64 and Windows x64" />
+    <img src="https://img.shields.io/badge/Platform-macOS%20arm64%20%7C%20Windows%20x64-0f766e?style=flat-square" alt="平台：macOS arm64 和 Windows x64" />
     <img src="https://img.shields.io/badge/Electron-43.4.0-47848f?style=flat-square&logo=electron&logoColor=white" alt="Electron 43.4.0" />
     <img src="https://img.shields.io/badge/React-18.2.0-149eca?style=flat-square&logo=react&logoColor=white" alt="React 18.2.0" />
     <img src="https://img.shields.io/badge/TypeScript-6.0.3-3178c6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript 6.0.3" />
-    <img src="https://img.shields.io/badge/Modes-Chat%20%7C%20Harness-2563eb?style=flat-square" alt="Modes: Chat and Harness" />
+    <img src="https://img.shields.io/badge/Modes-Chat%20%7C%20Harness-2563eb?style=flat-square" alt="模式：Chat 和 Harness" />
     <img src="https://img.shields.io/badge/License-MIT-16a34a?style=flat-square" alt="MIT License" />
   </p>
 
-English | [中文](README.md)
+[English](README.md) | 中文
 
   <p>
-    <a href="https://github.com/zcx960/deepseek-desktop/releases/latest"><img src="https://img.shields.io/github/v/release/zcx960/deepseek-desktop?display_name=tag&style=flat-square&label=Latest%20release" alt="Latest release" /></a>
-    <a href="https://github.com/zcx960/deepseek-desktop/releases"><img src="https://img.shields.io/github/downloads/zcx960/deepseek-desktop/total?style=flat-square&label=Downloads" alt="Downloads" /></a>
+    <a href="https://github.com/zcx960/deepseek-desktop/releases/latest"><img src="https://img.shields.io/github/v/release/zcx960/deepseek-desktop?display_name=tag&style=flat-square&label=Latest%20release" alt="最新发布版本" /></a>
+    <a href="https://github.com/zcx960/deepseek-desktop/releases"><img src="https://img.shields.io/github/downloads/zcx960/deepseek-desktop/total?style=flat-square&label=Downloads" alt="下载量" /></a>
   </p>
 </div>
 
-DeepSeek Desktop brings the local DeepSeek Harness Web UI and the official [DeepSeek Chat](https://chat.deepseek.com/) website into one native desktop window. Use the title-bar switch to move between **Chat** and **Harness** without merging their accounts, conversations, credentials, or storage.
+DeepSeek Desktop 将本地 DeepSeek Harness Web UI 与 [DeepSeek Chat 官方网页](https://chat.deepseek.com/) 集成到同一个原生桌面窗口中。用户可以通过标题栏切换 `Chat` 与 `Harness`，同时保持两个模式的账户、对话、凭据和存储彼此独立。
 
-> This is a community desktop project built on DeepSeek Harness. It is not an official DeepSeek product and does not bypass the official website's login, WAF, or embedding policies.
+> 本项目是基于 DeepSeek Harness 构建的社区桌面项目，并非 DeepSeek 官方产品，也不会绕过官方网站的登录、WAF 或嵌入策略。
 
-## Screenshots
+## 截图
 
-### Chat mode
+### Chat 模式
 
-The Chat mode opens the official DeepSeek Chat page in an isolated, persistent browser partition. The screenshot shows the signed-out entry page; users can sign in through the website's own interface.
+Chat 模式在隔离且持久的浏览器分区中打开 DeepSeek 官方网页。截图展示的是未登录入口；用户可以通过网站自身的界面完成登录。
 
-![DeepSeek Chat mode](assets/screenshots/chat-mode-home.png)
+![DeepSeek Chat 模式](assets/screenshots/chat-mode-home.png)
 
-### Harness mode
+### Harness 模式
 
-Harness mode runs the local Web UI with its workspace sidebar and agent composer.
+Harness 模式运行本地 Web UI，并提供工作区侧栏、会话列表和 agent（智能体）输入区。
 
-![DeepSeek Harness mode](assets/screenshots/harness-mode-home.png)
+![DeepSeek Harness 模式](assets/screenshots/harness-mode-home.png)
 
-## Highlights
+## 主要功能
 
-- **Two modes in one window.** Chat and Harness are independent retained views selected from the native title bar.
-- **Official Chat embedding.** Chat loads `https://chat.deepseek.com/` directly, keeps authentication in its own Electron partition, and never becomes a Harness model provider.
-- **Local Harness runtime.** Harness starts and supervises the local Host, Web UI, sessions, workspaces, tools, and agent configuration.
-- **State that stays separate.** The modes do not share cookies, credentials, conversations, attachments, prompts, or navigation state.
-- **Theme synchronization.** Light, dark, and system preferences stay synchronized across both modes while each renderer keeps its own page implementation.
-- **Native desktop behavior.** macOS and Windows use platform-aware title-bar controls; both sidebar layouts avoid overlapping the mode switch.
-- **MIT licensed.** The repository includes the MIT license. Third-party packages keep their own license notices.
+- **一个窗口提供两种模式。** Chat 与 Harness 是相互独立的保留视图，通过原生标题栏直接切换。
+- **嵌入官方 Chat。** Chat 直接加载 `https://chat.deepseek.com/`，认证信息保存在独立的 Electron 分区中，不会成为 Harness 模型提供方。
+- **本地 Harness 运行时。** Harness 启动并监管本地 Host、Web UI、会话、工作区、工具和 agent（智能体）配置。
+- **状态彼此隔离。** 两种模式不共享 Cookie、凭据、对话、附件、提示词或导航状态。
+- **主题同步。** 亮色、暗色和系统主题会在两种模式之间同步，同时保留各自页面的渲染实现。
+- **原生桌面行为。** macOS 与 Windows 使用适配平台的标题栏控件；两端的侧栏几何都会避开模式切换器，不发生遮挡。
+- **MIT 许可证。** 仓库包含 MIT 许可证；第三方包继续保留各自的许可证声明。
 
-## Platform support
+## 平台支持
 
-The current desktop composition targets:
+当前桌面组合支持：
 
-- macOS Apple Silicon (`arm64`), tested locally.
-- Windows (`x64`), packaged through the Electron Builder configuration.
-- GitHub Releases provide unsigned macOS `arm64` DMG/ZIP and Windows `x64` NSIS/ZIP artifacts for each tagged desktop release.
+- macOS Apple Silicon（`arm64`），已在本地验证。
+- Windows（`x64`），由 Electron Builder 配置负责打包。
+- GitHub Releases 会为每个桌面版本标签提供未签名的 macOS `arm64` DMG/ZIP 和 Windows `x64` NSIS/ZIP 产物。
 
-Linux remains available for the underlying Harness Web UI, but the native desktop packaging path is not currently a release target. Release artifacts are unsigned; platform signing and notarization require the credentials described in [the desktop release guide](apps/desktop/README.md#signed-macos-dmg).
+底层 Harness Web UI 仍可在 Linux 上运行，但原生桌面打包目前不以 Linux 为发布目标。发布产物未签名；平台签名和公证所需的凭据见[桌面发布指南](apps/desktop/README.md#signed-macos-dmg)。
 
-## Requirements
+## 环境要求
 
-- Node.js `^22.19.0` or `>=24.0.0`
+- Node.js `^22.19.0` 或 `>=24.0.0`
 - pnpm `11.7.0`
-- A DeepSeek API key for Harness model requests when the selected profile requires one.
-- A supported desktop host for Electron development or packaging.
+- Harness 发起模型请求时，需要根据所选 profile 提供 DeepSeek API key。
+- 用于 Electron 开发或打包的受支持桌面系统。
 
 <a id="run"></a><a id="run-from-source"></a>
 
-## Run from source
+## 从源码运行
 
 ```sh
 pnpm install
 pnpm run dev:desktop
 ```
 
-The development command builds the required Host, client, Web, and Electron layers before opening the desktop app. The first Chat selection opens the official website, where the user completes login if needed.
+开发命令会先构建所需的 Host、client、Web 和 Electron 层，然后打开桌面应用。首次选择 Chat 时会打开官方网站，用户可以按网站流程完成登录。
 
-## Build a desktop artifact
+## 构建桌面产物
 
 ```sh
 pnpm run package:desktop
 ```
 
-The packaging command builds the application, stages the Host runtime dependency tree, and creates an unpacked application for the current platform. Signed macOS distribution requires the release credentials described in [the desktop release guide](apps/desktop/README.md#signed-macos-dmg).
+打包命令会构建应用、暂存 Host 运行时依赖树，并为当前平台创建未签名的应用目录。macOS 签名分发所需的凭据和流程见[桌面发布指南](apps/desktop/README.md#signed-macos-dmg)。
 
-## Download a release
+## 下载发布版本
 
-Push a `vX.Y.Z` tag whose version matches `apps/desktop/package.json` to start the desktop release workflow. GitHub Actions builds unsigned macOS Apple Silicon and Windows x64 artifacts, then attaches them to a GitHub Release. Download the latest files from the [Releases page](https://github.com/zcx960/deepseek-desktop/releases).
+推送一个版本与 `apps/desktop/package.json` 一致的 `vX.Y.Z` 标签即可启动桌面发布 workflow。GitHub Actions 会构建未签名的 macOS Apple Silicon 和 Windows x64 产物，并将它们附加到 GitHub Release。最新文件可从 [Releases 页面](https://github.com/zcx960/deepseek-desktop/releases)下载。
 
-### First launch on macOS
+### macOS 首次打开
 
-The current macOS release artifacts are not Apple-signed or notarized. If macOS reports that the app is damaged or cannot be opened after you download it from this repository's Releases page and move it to Applications, run:
+当前 macOS 发布产物尚未经过 Apple 签名和公证。若从本仓库 Releases 页面下载并拖入“应用程序”目录后，macOS 提示应用“已损坏”或无法打开，请在终端执行：
 
 ```sh
 xattr -dr com.apple.quarantine "/Applications/DeepSeek Desktop.app"
 ```
 
-This command removes the download quarantine attribute only from this application. Run it only for DeepSeek Desktop downloaded from this repository's Releases page.
+该命令只移除这个应用的下载隔离属性；请仅对从本仓库 Releases 页面下载的 DeepSeek Desktop 执行。
 
-## Repository layout
+## 仓库结构
 
 ```text
 apps/desktop/       Electron application, native shell, and dual-mode controller
@@ -111,11 +111,11 @@ docs/               Architecture, testing, and contributor documentation
 vendor/             Pinned Cordis source
 ```
 
-The core Harness architecture and plugin contracts remain owned by the upstream [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) project. This repository adds the desktop composition and its platform integration.
+Harness 的核心架构和插件约定仍由上游 [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) 项目负责。本仓库增加桌面组合和平台集成。
 
-## Contributing
+## 参与贡献
 
-Read [AGENTS.md](AGENTS.md) and [the development guide](docs/development.md) before changing the repository. Focused checks for the desktop surface include:
+修改仓库前请阅读 [AGENTS.md](AGENTS.md) 和[开发指南](docs/development.md)。桌面范围的聚焦检查包括：
 
 ```sh
 pnpm --filter @deepseek-ai/dsh-desktop run typecheck
@@ -123,14 +123,14 @@ pnpm --filter @deepseek-ai/dsh-desktop run test:electron
 pnpm run build:desktop
 ```
 
-Please do not commit generated `lib/`, `dist/`, `runtime-host/`, `node_modules/`, or Playwright output directories.
+请不要提交生成的 `lib/`、`dist/`、`runtime-host/`、`node_modules/` 或 Playwright 输出目录。
 
-## 🙏 Acknowledgments
+## 🙏 致谢
 
 - [LINUX DO](https://linux.do/) — Community support and inspiration
 
-## License
+## 许可证
 
-This project is released under the [MIT License](LICENSE).
+本项目按照 [MIT License](LICENSE) 开源。
 
-DeepSeek and DeepSeek Chat are trademarks and services of their respective owners. Embedding the official website remains subject to its current terms and technical policies.
+DeepSeek 与 DeepSeek Chat 是其各自所有者的商标和服务。嵌入官方网站仍须遵守网站当前的服务条款和技术策略。
