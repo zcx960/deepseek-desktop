@@ -51,7 +51,7 @@ import {
 } from './shell-protocol.ts'
 import { createDesktopLifecycle } from './window-lifecycle.ts'
 
-const APP_NAME = 'DeepSeek Harness'
+const APP_NAME = 'DeepSeek Desktop'
 const WINDOW_WIDTH = 1440
 const WINDOW_HEIGHT = 920
 

@@ -8,7 +8,7 @@ function context(appOutDir: string, electronPlatformName = 'darwin') {
   return {
     appOutDir,
     electronPlatformName,
-    packager: { appInfo: { productFilename: 'DeepSeek Harness' } },
+    packager: { appInfo: { productFilename: 'DeepSeek Desktop' } },
   } as Parameters<typeof afterPack>[0]
 }
 
@@ -16,14 +16,14 @@ describe('packaged desktop runtime verification', () => {
   it('accepts packaged Host entrypoints and shell assets', async () => {
     const appOutDir = await mkdtemp(join(tmpdir(), 'dsh-packaged-runtime-'))
     try {
-      const resources = join(appOutDir, 'DeepSeek Harness.app', 'Contents', 'Resources', 'host', 'node_modules')
+      const resources = join(appOutDir, 'DeepSeek Desktop.app', 'Contents', 'Resources', 'host', 'node_modules')
       const cli = join(resources, '@deepseek-ai', 'dsh', 'lib', 'bin.js')
       const web = join(resources, '@deepseek-ai', 'dsh-web-frontend', 'dist', 'index.html')
-      const shell = join(appOutDir, 'DeepSeek Harness.app', 'Contents', 'Resources', 'desktop-resources')
-      const preload = join(appOutDir, 'DeepSeek Harness.app', 'Contents', 'Resources', 'app.asar.unpacked', 'lib', 'shell-preload.cjs')
-      const chromePreload = join(appOutDir, 'DeepSeek Harness.app', 'Contents', 'Resources', 'app.asar.unpacked', 'lib', 'mode-chrome-preload.cjs')
-      const harnessThemePreload = join(appOutDir, 'DeepSeek Harness.app', 'Contents', 'Resources', 'app.asar.unpacked', 'lib', 'harness-theme-preload.cjs')
-      const chatThemePreload = join(appOutDir, 'DeepSeek Harness.app', 'Contents', 'Resources', 'app.asar.unpacked', 'lib', 'chat-theme-preload.cjs')
+      const shell = join(appOutDir, 'DeepSeek Desktop.app', 'Contents', 'Resources', 'desktop-resources')
+      const preload = join(appOutDir, 'DeepSeek Desktop.app', 'Contents', 'Resources', 'app.asar.unpacked', 'lib', 'shell-preload.cjs')
+      const chromePreload = join(appOutDir, 'DeepSeek Desktop.app', 'Contents', 'Resources', 'app.asar.unpacked', 'lib', 'mode-chrome-preload.cjs')
+      const harnessThemePreload = join(appOutDir, 'DeepSeek Desktop.app', 'Contents', 'Resources', 'app.asar.unpacked', 'lib', 'harness-theme-preload.cjs')
+      const chatThemePreload = join(appOutDir, 'DeepSeek Desktop.app', 'Contents', 'Resources', 'app.asar.unpacked', 'lib', 'chat-theme-preload.cjs')
       await mkdir(join(cli, '..'), { recursive: true })
       await mkdir(join(web, '..'), { recursive: true })
       await mkdir(shell, { recursive: true })
@@ -48,7 +48,7 @@ describe('packaged desktop runtime verification', () => {
   it('rejects a packaged shell whose shell assets are missing', async () => {
     const appOutDir = await mkdtemp(join(tmpdir(), 'dsh-packaged-runtime-'))
     try {
-      const resources = join(appOutDir, 'DeepSeek Harness.app', 'Contents', 'Resources', 'host', 'node_modules')
+      const resources = join(appOutDir, 'DeepSeek Desktop.app', 'Contents', 'Resources', 'host', 'node_modules')
       const cli = join(resources, '@deepseek-ai', 'dsh', 'lib', 'bin.js')
       const web = join(resources, '@deepseek-ai', 'dsh-web-frontend', 'dist', 'index.html')
       await mkdir(join(cli, '..'), { recursive: true })

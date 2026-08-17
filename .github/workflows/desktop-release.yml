@@ -120,7 +120,7 @@ jobs:
           else
             gh release create "$RELEASE_TAG" release-assets/* \
               --repo "$GITHUB_REPOSITORY" \
-              --title "DeepSeek Harness Desktop $RELEASE_TAG" \
+              --title "DeepSeek Desktop $RELEASE_TAG" \
               --generate-notes \
               --notes "Unsigned macOS Apple Silicon and Windows x64 desktop builds."
           fi

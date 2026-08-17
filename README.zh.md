@@ -1,8 +1,8 @@
-# DeepSeek Harness Desktop
+# DeepSeek Desktop
 
 [English](README.md) | 中文
 
-DeepSeek Harness Desktop 将本地 DeepSeek Harness Web UI 与 [DeepSeek Chat 官方网页](https://chat.deepseek.com/) 集成到同一个原生桌面窗口中。用户可以通过标题栏切换 `Chat` 与 `Harness`，同时保持两个模式的账户、对话、凭据和存储彼此独立。
+DeepSeek Desktop 将本地 DeepSeek Harness Web UI 与 [DeepSeek Chat 官方网页](https://chat.deepseek.com/) 集成到同一个原生桌面窗口中。用户可以通过标题栏切换 `Chat` 与 `Harness`，同时保持两个模式的账户、对话、凭据和存储彼此独立。
 
 > 本项目是基于 DeepSeek Harness 构建的社区桌面项目，并非 DeepSeek 官方产品，也不会绕过官方网站的登录、WAF 或嵌入策略。
 
@@ -68,7 +68,7 @@ pnpm run package:desktop
 
 ## 下载发布版本
 
-推送一个版本与 `apps/desktop/package.json` 一致的 `vX.Y.Z` 标签即可启动桌面发布 workflow。GitHub Actions 会构建未签名的 macOS Apple Silicon 和 Windows x64 产物，并将它们附加到 GitHub Release。最新文件可从 [Releases 页面](https://github.com/zcx960/deepseek-harness-desktop/releases)下载。
+推送一个版本与 `apps/desktop/package.json` 一致的 `vX.Y.Z` 标签即可启动桌面发布 workflow。GitHub Actions 会构建未签名的 macOS Apple Silicon 和 Windows x64 产物，并将它们附加到 GitHub Release。最新文件可从 [Releases 页面](https://github.com/zcx960/deepseek-desktop/releases)下载。
 
 ## 仓库结构
 

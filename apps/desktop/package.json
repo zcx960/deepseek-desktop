@@ -1,6 +1,6 @@
 {
   "name": "@deepseek-ai/dsh-desktop",
-  "description": "DeepSeek Harness desktop application with tray-owned Host lifecycle",
+  "description": "DeepSeek Desktop application with tray-owned Host lifecycle",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -29,7 +29,7 @@
   },
   "build": {
     "appId": "ai.deepseek.harness.desktop",
-    "productName": "DeepSeek Harness",
+    "productName": "DeepSeek Desktop",
     "electronDist": "node_modules/electron/dist",
     "afterPack": "./scripts/verify-packaged-runtime.ts",
     "asar": true,

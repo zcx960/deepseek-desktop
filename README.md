@@ -1,8 +1,8 @@
-# DeepSeek Harness Desktop
+# DeepSeek Desktop
 
 English | [中文](README.zh.md)
 
-DeepSeek Harness Desktop brings the local DeepSeek Harness Web UI and the official [DeepSeek Chat](https://chat.deepseek.com/) website into one native desktop window. Use the title-bar switch to move between **Chat** and **Harness** without merging their accounts, conversations, credentials, or storage.
+DeepSeek Desktop brings the local DeepSeek Harness Web UI and the official [DeepSeek Chat](https://chat.deepseek.com/) website into one native desktop window. Use the title-bar switch to move between **Chat** and **Harness** without merging their accounts, conversations, credentials, or storage.
 
 > This is a community desktop project built on DeepSeek Harness. It is not an official DeepSeek product and does not bypass the official website's login, WAF, or embedding policies.
 
@@ -68,7 +68,7 @@ The packaging command builds the application, stages the Host runtime dependency
 
 ## Download a release
 
-Push a `vX.Y.Z` tag whose version matches `apps/desktop/package.json` to start the desktop release workflow. GitHub Actions builds unsigned macOS Apple Silicon and Windows x64 artifacts, then attaches them to a GitHub Release. Download the latest files from the [Releases page](https://github.com/zcx960/deepseek-harness-desktop/releases).
+Push a `vX.Y.Z` tag whose version matches `apps/desktop/package.json` to start the desktop release workflow. GitHub Actions builds unsigned macOS Apple Silicon and Windows x64 artifacts, then attaches them to a GitHub Release. Download the latest files from the [Releases page](https://github.com/zcx960/deepseek-desktop/releases).
 
 ## Repository layout
 

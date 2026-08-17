@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vitest'
 interface DesktopPackage {
   readonly scripts: Readonly<Record<string, string>>
   readonly build: {
+    readonly appId: string
     readonly afterPack: string
     readonly asarUnpack: readonly string[]
     readonly electronDist: string
@@ -15,6 +16,7 @@ interface DesktopPackage {
       readonly from: string
       readonly to: string
     }[]
+    readonly productName: string
     readonly mac: {
       readonly hardenedRuntime: boolean
       readonly icon: string
@@ -64,6 +66,11 @@ function includesPackagedFile(relativePath: string): boolean {
 }
 
 describe('desktop packaging configuration', () => {
+  it('uses the DeepSeek Desktop product identity', () => {
+    expect(desktopPackage.build.appId).toBe('ai.deepseek.harness.desktop')
+    expect(desktopPackage.build.productName).toBe('DeepSeek Desktop')
+  })
+
   it('packages the installed Electron distribution', () => {
     expect(desktopPackage.build.electronDist).toBe('node_modules/electron/dist')
     expect(workspaceConfiguration).toContain("'app-builder-lib@26.15.3>@electron/get': '3.1.0'")

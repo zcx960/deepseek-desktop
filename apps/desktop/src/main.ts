@@ -25,7 +25,7 @@ import {
 } from './desktop-application.ts'
 import { createHostSupervisor, spawnDshWeb } from './host-supervisor.ts'
 
-const APP_NAME = 'DeepSeek Harness'
+const APP_NAME = 'DeepSeek Desktop'
 const DESKTOP_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const REPOSITORY_ROOT = resolve(DESKTOP_DIR, '../..')
 

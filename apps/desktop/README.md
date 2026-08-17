@@ -1,4 +1,4 @@
-# DeepSeek Harness Desktop
+# DeepSeek Desktop
 
 English | [中文](README.zh.md)
 
@@ -89,7 +89,7 @@ After a successful build, mount the generated DMG and verify the installed appli
 DMG_PATH="$(find apps/desktop/dist -maxdepth 1 -type f -name '*.dmg' -print -quit)"
 MOUNT_POINT="$(mktemp -d)"
 hdiutil attach "$DMG_PATH" -mountpoint "$MOUNT_POINT" -nobrowse -readonly
-APP_PATH="$MOUNT_POINT/DeepSeek Harness.app"
+APP_PATH="$MOUNT_POINT/DeepSeek Desktop.app"
 codesign --verify --deep --strict --verbose=2 "$APP_PATH"
 spctl --assess --type execute --verbose=4 "$APP_PATH"
 xcrun stapler validate "$APP_PATH"
