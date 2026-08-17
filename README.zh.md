@@ -68,12 +68,12 @@ pnpm run package:desktop
 ## 仓库结构
 
 ```text
-apps/desktop/       Electron 应用、原生外壳和双模式控制器
-apps/web/           Harness Web 前端
-packages/           Harness 与 client 插件 workspace
-assets/screenshots/ README 截图资源
-docs/               架构、测试和贡献文档
-vendor/             固定版本的 Cordis 源码
+apps/desktop/       Electron application, native shell, and dual-mode controller
+apps/web/           Harness Web frontend
+packages/           Harness and client plugin workspaces
+assets/screenshots/ README screenshots
+docs/               Architecture, testing, and contributor documentation
+vendor/             Pinned Cordis source
 ```
 
 Harness 的核心架构和插件约定仍由上游 [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) 项目负责。本仓库增加桌面组合和平台集成。
