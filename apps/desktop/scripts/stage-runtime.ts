@@ -41,7 +41,12 @@ function parseTargetArchitecture(): TargetArchitecture | undefined {
 
 async function run(command: string, args: readonly string[]): Promise<void> {
   await new Promise<void>((accept, reject) => {
-    const child = spawn(command, args, { cwd: repositoryRoot, env: { ...process.env, CI: 'true' }, stdio: 'inherit' })
+    const child = spawn(command, args, {
+      cwd: repositoryRoot,
+      env: { ...process.env, CI: 'true' },
+      shell: process.platform === 'win32',
+      stdio: 'inherit',
+    })
     child.once('error', reject)
     child.once('exit', (code, signal) => {
       if (code === 0) accept()
