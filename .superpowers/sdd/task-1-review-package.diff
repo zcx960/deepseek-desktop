@@ -1,0 +1,148 @@
+diff -ruN .superpowers/sdd/snapshots/task-1-before/apps/desktop/package.json .superpowers/sdd/snapshots/task-1-after/apps/desktop/package.json
+--- .superpowers/sdd/snapshots/task-1-before/apps/desktop/package.json	2026-08-14 23:17:37
++++ .superpowers/sdd/snapshots/task-1-after/apps/desktop/package.json	2026-08-14 23:23:56
+@@ -14,6 +14,9 @@
+     "dist:mac": "node --import tsx scripts/release-mac.ts"
+   },
+   "license": "MIT",
++  "dependencies": {
++    "@deepseek-ai/dsh-atomic-write": "workspace:^"
++  },
+   "devDependencies": {
+     "@types/node": "^22.20.0",
+     "electron": "43.4.0",
+diff -ruN .superpowers/sdd/snapshots/task-1-before/apps/desktop/src/desktop-mode.ts .superpowers/sdd/snapshots/task-1-after/apps/desktop/src/desktop-mode.ts
+--- .superpowers/sdd/snapshots/task-1-before/apps/desktop/src/desktop-mode.ts	2026-08-14 23:23:56
++++ .superpowers/sdd/snapshots/task-1-after/apps/desktop/src/desktop-mode.ts	2026-08-14 23:23:56
+@@ -0,0 +1,37 @@
++/** Shared mode and desktop-surface contracts for the desktop application. */
++
++/** Selectable top-level desktop experience. */
++export type DesktopMode = 'chat' | 'harness'
++
++/** Lifecycle phase reported by a desktop mode surface. */
++export type DesktopModePhase = 'idle' | 'loading' | 'ready' | 'failed'
++
++/** Current lifecycle state of one desktop mode surface. */
++export interface DesktopModeStatus {
++  readonly phase: DesktopModePhase
++  readonly message?: string
++}
++
++/** Combined mode selection and surface status snapshot. */
++export interface DesktopModeSnapshot {
++  readonly selected: DesktopMode
++  readonly chat: DesktopModeStatus
++  readonly harness: DesktopModeStatus
++  readonly pendingExternalUrl: boolean
++}
++
++/** Pixel bounds occupied by a desktop content surface. */
++export interface DesktopContentBounds {
++  readonly x: number
++  readonly y: number
++  readonly width: number
++  readonly height: number
++}
++
++/** Lifecycle and presentation operations owned by a desktop surface. */
++export interface DesktopSurface {
++  setBounds(bounds: DesktopContentBounds): void
++  setVisible(visible: boolean): void
++  reload(): void
++  dispose(): Promise<void>
++}
+diff -ruN .superpowers/sdd/snapshots/task-1-before/apps/desktop/src/desktop-state.ts .superpowers/sdd/snapshots/task-1-after/apps/desktop/src/desktop-state.ts
+--- .superpowers/sdd/snapshots/task-1-before/apps/desktop/src/desktop-state.ts	2026-08-14 23:23:56
++++ .superpowers/sdd/snapshots/task-1-after/apps/desktop/src/desktop-state.ts	2026-08-14 23:23:56
+@@ -0,0 +1,49 @@
++/** Durable last-selected desktop mode state. */
++
++import { readFile } from 'node:fs/promises'
++// @ts-ignore The workspace path resolves source across this package's rootDir; runtime uses the package artifact.
++import { writeFileAtomic } from '@deepseek-ai/dsh-atomic-write'
++import type { DesktopMode } from './desktop-mode.ts'
++
++interface DesktopStateDocument {
++  readonly version: 1
++  readonly mode: DesktopMode
++}
++
++/** Read the last selected mode, defaulting to Harness when no state exists.
++ * @param filename - JSON file containing the persisted desktop mode.
++ * @returns the validated persisted mode, or `harness` when the file is absent.
++ */
++export async function loadDesktopMode(filename: string): Promise<DesktopMode> {
++  let content: string
++  try {
++    content = await readFile(filename, 'utf8')
++  } catch (error) {
++    if ((error as NodeJS.ErrnoException | null)?.code === 'ENOENT') return 'harness'
++    throw error
++  }
++
++  let value: unknown
++  try {
++    value = JSON.parse(content)
++  } catch {
++    throw new Error('desktop state is invalid')
++  }
++  if (!isDesktopStateDocument(value)) throw new Error('desktop state is invalid')
++  return value.mode
++}
++
++/** Persist the selected mode using an owner-only atomic file replacement.
++ * @param filename - JSON file receiving the persisted desktop mode.
++ * @param mode - selected desktop mode.
++ */
++export async function saveDesktopMode(filename: string, mode: DesktopMode): Promise<void> {
++  const content = `${JSON.stringify({ version: 1, mode })}\n`
++  await writeFileAtomic(filename, content, { mode: 0o600, dirMode: 0o700 })
++}
++
++function isDesktopStateDocument(value: unknown): value is DesktopStateDocument {
++  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false
++  const candidate = value as Record<string, unknown>
++  return candidate.version === 1 && (candidate.mode === 'chat' || candidate.mode === 'harness')
++}
+diff -ruN .superpowers/sdd/snapshots/task-1-before/apps/desktop/tests/desktop-state.spec.ts .superpowers/sdd/snapshots/task-1-after/apps/desktop/tests/desktop-state.spec.ts
+--- .superpowers/sdd/snapshots/task-1-before/apps/desktop/tests/desktop-state.spec.ts	2026-08-14 23:23:56
++++ .superpowers/sdd/snapshots/task-1-after/apps/desktop/tests/desktop-state.spec.ts	2026-08-14 23:23:56
+@@ -0,0 +1,37 @@
++import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
++import { tmpdir } from 'node:os'
++import { join } from 'node:path'
++import { afterEach, describe, expect, it } from 'vitest'
++import { loadDesktopMode, saveDesktopMode } from '../src/desktop-state.ts'
++
++const roots: string[] = []
++
++afterEach(async () => {
++  await Promise.all(roots.splice(0).map(root => rm(root, { recursive: true, force: true })))
++})
++
++async function stateFile(): Promise<string> {
++  const root = await mkdtemp(join(tmpdir(), 'dsh-desktop-state-'))
++  roots.push(root)
++  await mkdir(join(root, 'nested'))
++  return join(root, 'nested', 'desktop-state.json')
++}
++
++describe('desktop mode persistence', () => {
++  it('defaults a missing file to Harness', async () => {
++    await expect(loadDesktopMode(await stateFile())).resolves.toBe('harness')
++  })
++
++  it('round-trips a validated versioned mode with owner-only permissions', async () => {
++    const filename = await stateFile()
++    await saveDesktopMode(filename, 'chat')
++    expect(await readFile(filename, 'utf8')).toBe('{"version":1,"mode":"chat"}\n')
++    await expect(loadDesktopMode(filename)).resolves.toBe('chat')
++  })
++
++  it('rejects malformed or unknown durable state', async () => {
++    const filename = await stateFile()
++    await writeFile(filename, '{"version":2,"mode":"chat"}\n')
++    await expect(loadDesktopMode(filename)).rejects.toThrow('desktop state is invalid')
++  })
++})

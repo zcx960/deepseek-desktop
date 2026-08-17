@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN" data-mode="harness">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; img-src 'self'">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="mode-chrome.css">
+  <title>DeepSeek Harness mode selector</title>
+</head>
+<body>
+  <main id="mode-chrome-root">
+    <div id="chrome-controls">
+      <div id="mode-switch" role="radiogroup" aria-label="Desktop mode">
+        <span id="mode-highlight" aria-hidden="true"></span>
+        <button type="button" role="radio" data-mode="chat" aria-checked="false" tabindex="-1">Chat</button>
+        <button type="button" role="radio" data-mode="harness" aria-checked="true" tabindex="0">Harness</button>
+      </div>
+      <button id="chat-actions" type="button" aria-label="Chat actions" aria-expanded="false" hidden>...</button>
+    </div>
+    <div id="chat-menu" role="menu" aria-label="Chat actions" hidden>
+      <button id="reload-chat" role="menuitem" type="button">Reload Chat</button>
+      <button id="clear-chat-data" role="menuitem" type="button">Clear Chat Data</button>
+    </div>
+    <dialog id="clear-chat-confirm">
+      <p>Clear the embedded Chat login and local browsing data?</p>
+      <form method="dialog">
+        <button value="cancel">Cancel</button>
+        <button id="confirm-clear" value="confirm">Clear data</button>
+      </form>
+    </dialog>
+  </main>
+</body>
+</html>

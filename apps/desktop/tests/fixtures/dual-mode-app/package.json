@@ -1,0 +1,6 @@
+{
+  "name": "dsh-dual-mode-electron-fixture",
+  "private": true,
+  "type": "module",
+  "main": "main.mjs"
+}

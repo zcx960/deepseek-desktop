@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="shell.css">
+  <title>DeepSeek Harness</title>
+</head>
+<body>
+  <div id="titlebar-backdrop" aria-hidden="true"></div>
+  <div id="window-drag-region" aria-hidden="true"></div>
+  <main id="mode-status" hidden>
+    <div class="status-copy">
+      <h1 id="status-title"></h1>
+      <p id="status-message"></p>
+    </div>
+    <div id="status-actions">
+      <button id="retry" type="button">Retry</button>
+      <button id="open-browser" type="button">Open in browser</button>
+      <button id="open-external" type="button" hidden>Open link in browser</button>
+    </div>
+  </main>
+</body>
+</html>

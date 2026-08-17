@@ -1,0 +1,4 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority.
+2026-08-16-desktop-segmented-mode-switcher.md: e55f41eaa8790c03ebcd7183b0baf5f4cf05c407
+2026-08-16-desktop-segmented-mode-switcher.zh.md: 8fab46cd451a8d5cab18dacc0e9d8426b3d12171
