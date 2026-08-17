@@ -6,6 +6,7 @@ import type { DesktopChromeSurface } from './shell-protocol.ts'
 const CHROME_TOP = 6
 const CHROME_INLINE_INSET = 12
 const CHROME_INLINE_INSET_MACOS = 88
+const CHROME_INLINE_INSET_WINDOWS = 88
 const CHROME_CONTROL_HEIGHT = 32
 const CHROME_SWITCH_WIDTH = 164
 const CHROME_CHAT_ACTION_GAP = 4
@@ -22,7 +23,11 @@ export interface DesktopChromeBoundsInput {
 }
 
 function inlineInset(platform: NodeJS.Platform): number {
-  return platform === 'darwin' ? CHROME_INLINE_INSET_MACOS : CHROME_INLINE_INSET
+  if (platform === 'darwin') return CHROME_INLINE_INSET_MACOS
+  // Windows keeps the collapsed sidebar rail at the leading edge; leave its
+  // whale toggle outside the native mode-chrome BrowserView hit rectangle.
+  if (platform === 'win32') return CHROME_INLINE_INSET_WINDOWS
+  return CHROME_INLINE_INSET
 }
 
 function controlsWidth(mode: DesktopMode): number {
@@ -37,7 +42,7 @@ function controlsWidth(mode: DesktopMode): number {
  * @returns A CSS-pixel x-coordinate that cannot overlap closed mode chrome.
  */
 export function desktopTitlebarDragStart(platform: NodeJS.Platform): number {
-  return platform === 'darwin' ? 300 : 224
+  return platform === 'darwin' || platform === 'win32' ? 300 : 224
 }
 
 /**

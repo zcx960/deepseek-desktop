@@ -24,7 +24,7 @@ describe('desktop mode chrome geometry', () => {
     })).toEqual({ x: 88, y: 6, width: 200, height: 32 })
     expect(desktopChromeBounds({
       platform: 'win32', mode: 'harness', surface: 'closed', content,
-    })).toEqual({ x: 12, y: 6, width: 164, height: 32 })
+    })).toEqual({ x: 88, y: 6, width: 164, height: 32 })
   })
 
   it('keeps each closed control outside the title-bar drag region', () => {
