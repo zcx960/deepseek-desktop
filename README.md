@@ -90,6 +90,16 @@ pnpm run package:desktop
 
 推送一个版本与 `apps/desktop/package.json` 一致的 `vX.Y.Z` 标签即可启动桌面发布 workflow。GitHub Actions 会构建未签名的 macOS Apple Silicon 和 Windows x64 产物，并将它们附加到 GitHub Release。最新文件可从 [Releases 页面](https://github.com/zcx960/deepseek-desktop/releases)下载。
 
+### macOS 首次打开
+
+当前 macOS 发布产物尚未经过 Apple 签名和公证。若从本仓库 Releases 页面下载并拖入“应用程序”目录后，macOS 提示应用“已损坏”或无法打开，请在终端执行：
+
+```sh
+xattr -dr com.apple.quarantine "/Applications/DeepSeek Desktop.app"
+```
+
+该命令只移除这个应用的下载隔离属性；请仅对从本仓库 Releases 页面下载的 DeepSeek Desktop 执行。
+
 ## 仓库结构
 
 ```text

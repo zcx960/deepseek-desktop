@@ -90,6 +90,16 @@ The packaging command builds the application, stages the Host runtime dependency
 
 Push a `vX.Y.Z` tag whose version matches `apps/desktop/package.json` to start the desktop release workflow. GitHub Actions builds unsigned macOS Apple Silicon and Windows x64 artifacts, then attaches them to a GitHub Release. Download the latest files from the [Releases page](https://github.com/zcx960/deepseek-desktop/releases).
 
+### First launch on macOS
+
+The current macOS release artifacts are not Apple-signed or notarized. If macOS reports that the app is damaged or cannot be opened after you download it from this repository's Releases page and move it to Applications, run:
+
+```sh
+xattr -dr com.apple.quarantine "/Applications/DeepSeek Desktop.app"
+```
+
+This command removes the download quarantine attribute only from this application. Run it only for DeepSeek Desktop downloaded from this repository's Releases page.
+
 ## Repository layout
 
 ```text
