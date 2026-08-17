@@ -6,7 +6,7 @@
  * standard kit — never through the internal context objects (BindingContext
  * does not leave the package).
  */
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { act, render } from '@testing-library/react'
 import type { SessionMaybeProvideInfo, StoredEntry } from '@deepseek-ai/dsh-client-ui-slots'
@@ -30,14 +30,14 @@ function observable<T>(initial: T) {
  * render inside the renderer tree (HostContext), so the harness mounts a real
  * root entry whose body is the test's render-prop provider.
  */
-function makeHost(bodies: { root: (rp: (key: string, owner: object) => React.ReactNode) => React.ReactNode }) {
+function makeHost(bodies: { root: (rp: (key: string, owner: object) => ReactNode) => ReactNode }) {
   const absentInfo: SessionMaybeProvideInfo = { sessionId: undefined, hooks: { session: undefined }, props: {} }
   const provide = observable<SessionMaybeProvideInfo>(absentInfo)
   let currentId: string | undefined
   const infos = new Map<string, SessionProvideInfo>()
   const sessionEntries: StoredEntry[] = []
   const rootEntry: StoredEntry = {
-    component: (props: { renderSlot: (key: string, owner: object) => React.ReactNode }) =>
+    component: (props: { renderSlot: (key: string, owner: object) => ReactNode }) =>
       <>{bodies.root(props.renderSlot)}</>,
     options: {},
     children: { 'k.session': { kind: 'single', scope: 'session' } },

@@ -6,6 +6,7 @@
 
 import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest'
 import { act, cleanup, fireEvent, render } from '@testing-library/react'
+import type { ReactNode } from 'react'
 import { bindSnapshotSelector } from '@deepseek-ai/dsh-client-web-react'
 import {
   createSnapshotStore, EMPTY_CHAT_SNAPSHOT, EMPTY_CONVERSATION_VIEWS,
@@ -49,10 +50,10 @@ function snapshotOf(overrides: Partial<ConversationSnapshot> = {}): Conversation
 }
 
 interface BenchOptions {
-  planEntry?: React.ReactNode
+  planEntry?: ReactNode
   /** The `plan` projection value the standard-kit useProjection serves. */
   plan?: { active: boolean; pending: boolean }
-  modelEntry?: React.ReactNode
+  modelEntry?: ReactNode
   /** Hot text-ref lexicon (injects a minimal slash stub exposing only lexicon()). */
   lexicon?: ReadonlyMap<'/' | '@', readonly string[]>
   permissions?: { options: { value: string; name: string; description?: string }[]; currentValue: string }
@@ -80,10 +81,10 @@ interface BenchOptions {
   placeholder?: string
   t?: InputBarProps['t']
   command?: (line: string) => Promise<boolean>
-  accessory?: React.ReactNode
-  overlay?: React.ReactNode
-  leftItems?: React.ReactNode
-  rightItems?: React.ReactNode
+  accessory?: ReactNode
+  overlay?: ReactNode
+  leftItems?: ReactNode
+  rightItems?: ReactNode
   attachments?: readonly ComposerAttachment[]
   addImages?: (files: readonly File[]) => string | null
   commandMenuOpen?: boolean

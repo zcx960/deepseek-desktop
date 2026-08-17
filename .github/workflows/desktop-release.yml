@@ -1,0 +1,122 @@
+name: Desktop Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '24'
+
+jobs:
+  build:
+    name: Build ${{ matrix.name }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS arm64
+            runner: macos-14
+            platform: mac
+            architecture: arm64
+            targets: dmg zip
+            artifact: desktop-macos-arm64
+            paths: |
+              apps/desktop/dist/*.dmg
+              apps/desktop/dist/*.zip
+            builder_options: --config.mac.notarize=false --config.mac.hardenedRuntime=false
+          - name: Windows x64
+            runner: windows-2022
+            platform: win
+            architecture: x64
+            targets: nsis zip
+            artifact: desktop-windows-x64
+            paths: |
+              apps/desktop/dist/*.exe
+              apps/desktop/dist/*.zip
+            builder_options: ''
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          dest: ${{ runner.temp }}/setup-pnpm
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify release version
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: node -e "const fs=require('node:fs'); const tag=process.env.RELEASE_TAG; const expected=JSON.parse(fs.readFileSync('apps/desktop/package.json','utf8')).version; if (tag.slice(1)!==expected) throw new Error('tag '+tag+' does not match desktop version '+expected); console.log('desktop release version '+expected);"
+
+      - name: Verify runner architecture
+        env:
+          EXPECTED_ARCHITECTURE: ${{ matrix.architecture }}
+        run: node -e "const expected=process.env.EXPECTED_ARCHITECTURE; if (process.arch!==expected) throw new Error('runner architecture '+process.arch+' does not match '+expected); console.log('runner architecture '+process.arch);"
+
+      - name: Build repository
+        run: pnpm run build
+
+      - name: Stage Host runtime
+        run: node --import tsx apps/desktop/scripts/stage-runtime.ts
+
+      - name: Build distributable
+        working-directory: apps/desktop
+        run: pnpm exec electron-builder --${{ matrix.platform }} ${{ matrix.targets }} --${{ matrix.architecture }} --publish never ${{ matrix.builder_options }}
+
+      - name: Upload platform artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.paths }}
+          if-no-files-found: error
+          retention-days: 7
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Download platform artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: Create or update GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" release-assets/* --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$RELEASE_TAG" release-assets/* \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "DeepSeek Harness Desktop $RELEASE_TAG" \
+              --generate-notes \
+              --notes "Unsigned macOS Apple Silicon and Windows x64 desktop builds."
+          fi

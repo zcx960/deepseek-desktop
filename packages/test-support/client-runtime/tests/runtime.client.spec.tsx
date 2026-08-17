@@ -7,6 +7,7 @@
  * stack — this suite is the fixture the migrated feature specs rely on.
  */
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import type { ReactNode } from 'react'
 import { stubSettingsScope } from '../src/settings-scope.ts'
 import { cleanup } from '@testing-library/react'
 import { defineStore } from '@deepseek-ai/dsh-client-runtime/client'
@@ -417,7 +418,7 @@ describe('feature mount and disposal', () => {
           id: 'row-1',
           children: { 'trt.rows.hole': { kind: 'single', scope: 'root' } },
         } as never, ((props: { renderSlot: (key: string, owner: object) => unknown }) =>
-          <div data-testid="row">{props.renderSlot('trt.rows.hole', {}) as React.ReactNode}</div>) as never)
+          <div data-testid="row">{props.renderSlot('trt.rows.hole', {}) as ReactNode}</div>) as never)
       },
     })
     const view = runtime.renderRoot()

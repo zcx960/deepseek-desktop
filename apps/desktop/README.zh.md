@@ -55,6 +55,10 @@ pnpm run package:desktop
 
 打包后的应用通过 Electron 的 Node 模式，在独立进程内运行已暂存的 `@deepseek-ai/dsh` CLI。应用因此保留受 supervisor 管理的 Host 生命周期，无需携带第二个 Node 可执行文件。如果暂存的 CLI 入口或 Web 前端入口缺失，`afterPack` 检查会在签名前拒绝该产物。macOS 和 Windows 都使用受跟踪的 `apps/desktop/build/icon.png` 原始文件；仓库不预处理图标，也不提交平台专用图标变体。
 
+### 自动 GitHub 发布
+
+推送一个版本与 `apps/desktop/package.json` 一致的 `vX.Y.Z` 标签会启动 `.github/workflows/desktop-release.yml`。独立的原生 runner 分别构建未签名的 macOS Apple Silicon DMG/ZIP 和 Windows x64 NSIS/ZIP 文件；只有两端构建都成功，工作流才会创建或更新对应的 GitHub Release。版本不一致或缺少产物会在发布前使工作流失败。
+
 ### 已签名的 macOS DMG
 
 macOS 发布命令要求构建用户的 Keychain 中安装有效的 `Developer ID Application` 身份，且证书与私钥必须同时存在。它还需要一组完整的公证凭据。Keychain profile 可以避免应用专用密码进入仓库或 shell 历史记录：
@@ -97,7 +101,7 @@ rmdir "$MOUNT_POINT"
 
 首个桌面装配使用回环 HTTP Host。renderer 和 Host 协议保持不变，因此后续可替换为 GUI 架构预留的 IPC carrier，而无需改动产品功能。
 
-已签名安装包的发布路径目前只面向 macOS。Windows 和 Linux 打包会生成未封装应用；它们的安装包格式与发布签名仍属于发布工作。
+GitHub Actions 会发布未签名的 macOS 和 Windows 安装包。带凭据的已签名安装包路径目前只面向 macOS；Windows 签名与 Linux 发布打包仍属于后续发布工作。
 
 本地 Electron 场景验证 Desktop 生命周期与存储策略，不验证在线 DeepSeek 网站的兼容性。DeepSeek 可以独立改变认证来源、WAF 行为、页面要求或嵌入策略。任何登录方式只有在 macOS 和 Windows 上都通过以下冒烟流程后，才具备发布资格：
 

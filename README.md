@@ -36,8 +36,9 @@ The current desktop composition targets:
 
 - macOS Apple Silicon (`arm64`), tested locally.
 - Windows (`x64`), packaged through the Electron Builder configuration.
+- GitHub Releases provide unsigned macOS `arm64` DMG/ZIP and Windows `x64` NSIS/ZIP artifacts for each tagged desktop release.
 
-Linux remains available for the underlying Harness Web UI, but the native desktop packaging path is not currently a release target.
+Linux remains available for the underlying Harness Web UI, but the native desktop packaging path is not currently a release target. Release artifacts are unsigned; platform signing and notarization require the credentials described in [the desktop release guide](apps/desktop/README.md#signed-macos-dmg).
 
 ## Requirements
 
@@ -64,6 +65,10 @@ pnpm run package:desktop
 ```
 
 The packaging command builds the application, stages the Host runtime dependency tree, and creates an unpacked application for the current platform. Signed macOS distribution requires the release credentials described in [the desktop release guide](apps/desktop/README.md#signed-macos-dmg).
+
+## Download a release
+
+Push a `vX.Y.Z` tag whose version matches `apps/desktop/package.json` to start the desktop release workflow. GitHub Actions builds unsigned macOS Apple Silicon and Windows x64 artifacts, then attaches them to a GitHub Release. Download the latest files from the [Releases page](https://github.com/zcx960/deepseek-harness-desktop/releases).
 
 ## Repository layout
 

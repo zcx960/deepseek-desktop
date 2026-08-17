@@ -36,8 +36,9 @@ Harness 模式运行本地 Web UI，并提供工作区侧栏、会话列表和 a
 
 - macOS Apple Silicon（`arm64`），已在本地验证。
 - Windows（`x64`），由 Electron Builder 配置负责打包。
+- GitHub Releases 会为每个桌面版本标签提供未签名的 macOS `arm64` DMG/ZIP 和 Windows `x64` NSIS/ZIP 产物。
 
-底层 Harness Web UI 仍可在 Linux 上运行，但原生桌面打包目前不以 Linux 为发布目标。
+底层 Harness Web UI 仍可在 Linux 上运行，但原生桌面打包目前不以 Linux 为发布目标。发布产物未签名；平台签名和公证所需的凭据见[桌面发布指南](apps/desktop/README.md#signed-macos-dmg)。
 
 ## 环境要求
 
@@ -64,6 +65,10 @@ pnpm run package:desktop
 ```
 
 打包命令会构建应用、暂存 Host 运行时依赖树，并为当前平台创建未签名的应用目录。macOS 签名分发所需的凭据和流程见[桌面发布指南](apps/desktop/README.md#signed-macos-dmg)。
+
+## 下载发布版本
+
+推送一个版本与 `apps/desktop/package.json` 一致的 `vX.Y.Z` 标签即可启动桌面发布 workflow。GitHub Actions 会构建未签名的 macOS Apple Silicon 和 Windows x64 产物，并将它们附加到 GitHub Release。最新文件可从 [Releases 页面](https://github.com/zcx960/deepseek-harness-desktop/releases)下载。
 
 ## 仓库结构
 

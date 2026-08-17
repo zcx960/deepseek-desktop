@@ -5,7 +5,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, fireEvent, render, within } from '@testing-library/react'
-import { useEffect } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import type {
   AssistantMessageNode, CommandNode, CompactionSummaryNode, ConversationNode, ConversationSnapshot,
   ModelRetryNode, RunningToolCall, SessionId, SessionListState, ToolCallBlock, ToolResultNode, TurnErrorNode,
@@ -174,14 +174,14 @@ function makeHarness(init?: Partial<ConversationSnapshot>) {
     openFile: ChatNodeOwnerProps['openFile']
     inspectCall: ChatNodeOwnerProps['inspectCall']
   }> = []
-  const renderCommandSlot = ((_key: string, _owner: object, opts?: { fallback?: React.ReactNode }) =>
+  const renderCommandSlot = ((_key: string, _owner: object, opts?: { fallback?: ReactNode }) =>
     opts?.fallback ?? null) as unknown as React.ComponentProps<typeof CommandNodeView>['renderSlot']
   const renderTurnTail = ((_key: string, _owner: object) => null) as unknown as
     React.ComponentProps<typeof TurnTailNodeView>['renderSlotChain']
   const renderTurnTailSlot = (() => null) as unknown as
     React.ComponentProps<typeof TurnTailNodeView>['renderSlot']
   const renderSlot = ((key: string, owner: object, opts?: {
-    fallback?: React.ReactNode
+    fallback?: ReactNode
     hookContext?: unknown
   }) => {
     if (key !== 'conversation.chat.node') return opts?.fallback ?? null
@@ -899,7 +899,7 @@ describe('ChatView', () => {
       runningCalls: [runningCall('r1')],
       running: true,
     })
-    h.props.renderSlot = ((key: string, owner: object, opts?: { fallback?: React.ReactNode }) => {
+    h.props.renderSlot = ((key: string, owner: object, opts?: { fallback?: ReactNode }) => {
       const routed = owner as RoutedChatNodeOwner
       return key === 'conversation.chat.node' && routed.node.kind === 'tool-call'
         ? <StatefulToolNode node={routed.node} />
@@ -954,7 +954,7 @@ describe('ChatView', () => {
     const block = toolResult(3, 'a')
     const h = makeHarness({ nodes: [block] })
     const calls: { key: string; owner: object; entryKey?: string }[] = []
-    h.props.renderSlot = ((key: string, owner: object, opts?: { entryKey?: string; fallback?: React.ReactNode }) => {
+    h.props.renderSlot = ((key: string, owner: object, opts?: { entryKey?: string; fallback?: ReactNode }) => {
       calls.push({ key, owner, ...(opts?.entryKey !== undefined ? { entryKey: opts.entryKey } : {}) })
       return opts?.fallback ?? null
     })

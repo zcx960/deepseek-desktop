@@ -55,6 +55,10 @@ pnpm run package:desktop
 
 Packaged applications run the staged `@deepseek-ai/dsh` CLI in a separate process through Electron's Node mode. The application therefore retains the supervised-Host lifecycle without shipping a second Node executable. An `afterPack` check rejects the package before signing when the staged CLI entry or Web frontend entry is absent. Both macOS and Windows use the exact tracked `apps/desktop/build/icon.png` source; the repository does not preprocess or commit platform-specific icon variants.
 
+### Automated GitHub releases
+
+Pushing a `vX.Y.Z` tag whose version matches `apps/desktop/package.json` starts `.github/workflows/desktop-release.yml`. Separate native runners build unsigned macOS Apple Silicon DMG/ZIP and Windows x64 NSIS/ZIP files; the workflow creates or updates the matching GitHub Release only after both builds succeed. A version mismatch or missing artifact fails the workflow before publication.
+
 ### Signed macOS DMG
 
 The macOS distribution command requires a valid `Developer ID Application` identity whose certificate and private key are both installed in the build user's Keychain. It also requires one complete notarization credential source. A Keychain profile keeps the app-specific password out of the repository and shell history:
@@ -97,7 +101,7 @@ rmdir "$MOUNT_POINT"
 
 The first desktop assembly uses a loopback HTTP Host. The renderer and Host protocol remain unchanged so the application can replace the transport with the IPC carrier reserved by the GUI architecture without changing product features.
 
-The signed installer path currently targets macOS. Windows and Linux packaging creates unpacked applications; their installer formats and distribution signing remain release work.
+GitHub Actions publishes unsigned macOS and Windows installers. The credential-backed signed installer path currently targets macOS; Windows signing and Linux release packaging remain release work.
 
 The local Electron scenario verifies Desktop lifecycle and storage policy, not compatibility with the live DeepSeek website. DeepSeek can change authentication origins, WAF behavior, page requirements, or embedding policy independently. No login method is release-qualified until the following smoke procedure passes on both macOS and Windows:
 
