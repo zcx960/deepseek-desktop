@@ -65,6 +65,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Ensure Electron runtime
+        working-directory: apps/desktop
+        run: pnpm exec electron --version
+
       - name: Verify release version
         env:
           RELEASE_TAG: ${{ github.ref_name }}
