@@ -125,6 +125,10 @@ pnpm run build:desktop
 
 Please do not commit generated `lib/`, `dist/`, `runtime-host/`, `node_modules/`, or Playwright output directories.
 
+## 🙏 Acknowledgments
+
+- [LINUX DO](https://linux.do/) — Community support and inspiration
+
 ## License
 
 This project is released under the [MIT License](LICENSE).

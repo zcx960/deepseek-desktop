@@ -125,6 +125,10 @@ pnpm run build:desktop
 
 请不要提交生成的 `lib/`、`dist/`、`runtime-host/`、`node_modules/` 或 Playwright 输出目录。
 
+## 🙏 致谢
+
+- [LINUX DO](https://linux.do/) — Community support and inspiration
+
 ## 许可证
 
 本项目按照 [MIT License](LICENSE) 开源。
