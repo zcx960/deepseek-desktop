@@ -3,7 +3,7 @@
 
   <h1>DeepSeek Desktop</h1>
 
-  <p>A native desktop client that combines the official DeepSeek Chat website with a local agent workspace.</p>
+  <p>A native desktop client that combines official DeepSeek Chat and Harness capabilities in one window.</p>
 
   <p>
     <img src="https://img.shields.io/badge/Platform-macOS%20arm64%20%7C%20Windows%20x64-0f766e?style=flat-square" alt="Platform: macOS arm64 and Windows x64" />
