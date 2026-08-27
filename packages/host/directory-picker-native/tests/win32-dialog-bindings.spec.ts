@@ -56,7 +56,7 @@ function comWorld(overrides: Partial<ComWorld> = {}): ComWorld {
 /** Sentinel pointer objects standing in for native addresses. */
 interface FakePtr { kind: string; [key: string]: unknown }
 
-function installFakeKoffi(world: ComWorld): void {
+function installFakeKoffi(world: ComWorld, supportsString16 = true): void {
   const dialogPtr: FakePtr = { kind: 'dialog' }
   const itemPtr: FakePtr = { kind: 'item' }
   const namePtr: FakePtr = { kind: 'name', text: world.path }
@@ -128,13 +128,14 @@ function installFakeKoffi(world: ComWorld): void {
       pointer: (type: unknown) => type,
       sizeof: (type: string) => { void type; return FAKE_POINTER_SIZE },
       view: (value: unknown, len: number): ArrayBuffer => {
+        if (supportsString16) throw new Error('legacy koffi.view path should not be used')
         const bytes = Buffer.alloc(len)
         bytes.write((value as FakePtr).text as string, 'utf16le')
         return bytes.buffer
       },
       register: (fn: (hwnd: unknown, lparam: unknown) => number) => { world.registered += 1; return { fn } },
       unregister: () => { world.unregistered += 1 },
-      decode: (value: unknown, offsetOrType: unknown): unknown => {
+      decode: Object.assign((value: unknown, offsetOrType: unknown): unknown => {
         if (offsetOrType === 'str16') return (value as FakePtr).text
         if (typeof offsetOrType === 'number') {
           // Vtable slot read: offsets must be multiples of the fake width.
@@ -145,7 +146,7 @@ function installFakeKoffi(world: ComWorld): void {
         // decode(x, 'void *'): out-buffer read or vtable read.
         if (outBuffers.has(value)) return outBuffers.get(value)
         return { owner: value as FakePtr }
-      },
+      }, supportsString16 ? { string16: (value: unknown) => (value as FakePtr).text } : {}),
       call: (fn: { call: (args: unknown[]) => number }, _proto: unknown, _self: unknown, ...args: unknown[]) => fn.call(args),
     },
   }))
@@ -178,6 +179,14 @@ describe('loadWin32DialogBindings over the fake COM world', () => {
     expect(world.freed).toHaveLength(1)
     expect(world.released).toEqual(['item', 'dialog'])
     expect(world.uninitialized).toBe(1)
+  })
+
+  it('keeps the legacy view fallback for older koffi releases', async () => {
+    const world = comWorld()
+    installFakeKoffi(world, false)
+    const { loadWin32DialogBindings } = await loadBindingsModule()
+    const bindings = await loadWin32DialogBindings()
+    expect(runFolderDialog(bindings, 'Pick', vi.fn())).toBe('C:\\选中\\directory')
   })
 
   it('maps dismissal and the S_FALSE CoInitializeEx', async () => {
