@@ -92,6 +92,10 @@ jobs:
       - name: Attach installers to the release
         env:
           GH_TOKEN: ${{ github.token }}
+          # This job downloads artifacts instead of checking out, so `gh` has no
+          # git remote to infer the repository from and fails with "not a git
+          # repository" without this.
+          GH_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
           mapfile -t files < <(find artifacts -type f \( -name '*.dmg' -o -name '*.zip' -o -name '*.exe' \) | sort)
