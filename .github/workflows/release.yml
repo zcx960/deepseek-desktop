@@ -1,12 +1,10 @@
 name: Release desktop installers
 
+# This signed pipeline belongs to the upstream project and needs Apple and
+# Windows code-signing credentials plus a self-hosted signing runner, none of
+# which exist on a fork. It is kept for reference and left manual-only so it
+# cannot fail on every tag or pull request. Use build.yml for unsigned builds.
 on:
-  push:
-    tags:
-      - 'v*'
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
     inputs:
       target:
