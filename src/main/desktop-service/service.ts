@@ -3,7 +3,19 @@ import { closeSync, existsSync, fstatSync, mkdirSync, openSync, readFileSync, re
 import { join } from 'node:path'
 import { compareVersions } from '../update/version-catalog'
 
+/**
+ * The vendor's desktop service: crash intake, plus the update policy endpoint.
+ *
+ * This fork does not talk to it. `initializeDesktopService()` leaves the service
+ * unconstructed, so nothing in this file runs, and `supportsAutoUpdates()`
+ * returns false so no caller reaches `checkUpdate()` either.
+ *
+ * The URL and the archive prefix are kept together on purpose: `checkUpdate`
+ * refuses any policy whose `feedUrl` is not the vendor's own archive, so a fork
+ * that repointed the update channel would have to change both of these.
+ */
 export const SERVICE_URL = 'https://dshdesktop.com/crash'
+const VENDOR_ARCHIVE_FEED = 'https://dshdesktop.com/updates/archive/'
 export type DesktopPlatform = 'mac' | 'mac-intel' | 'windows'
 export type FailureKind = 'startup-failure' | 'harness-crash' | 'renderer-crash' | 'gpu-crash' | 'main-crash' | 'unclean-exit'
 export type UpdateDecision = { updateAvailable: false } | { updateAvailable: true; version: string; feedUrl: string }
@@ -161,7 +173,7 @@ export class DesktopService {
     if (!response.ok) throw new Error(`Update policy unavailable (${response.status})`)
     const policy = await response.json() as Record<string, unknown>
     if (policy?.updateAvailable === false) return { updateAvailable: false }
-    if (policy?.updateAvailable !== true || !isVersion(policy.version) || compareVersions(policy.version.split('+')[0]!, this.options.version.split('+')[0]!) <= 0 || (!isPrereleaseVersion(this.options.version) && isPrereleaseVersion(policy.version)) || policy.feedUrl !== `https://dshdesktop.com/updates/archive/${policy.version}/`) throw new Error('Invalid update policy')
+    if (policy?.updateAvailable !== true || !isVersion(policy.version) || compareVersions(policy.version.split('+')[0]!, this.options.version.split('+')[0]!) <= 0 || (!isPrereleaseVersion(this.options.version) && isPrereleaseVersion(policy.version)) || policy.feedUrl !== `${VENDOR_ARCHIVE_FEED}${policy.version}/`) throw new Error('Invalid update policy')
     return { updateAvailable: true, version: policy.version, feedUrl: policy.feedUrl as string }
   }
 }

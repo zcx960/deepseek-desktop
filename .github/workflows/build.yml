@@ -3,6 +3,12 @@ name: Build installers
 # Unsigned builds for the forks of this repository. Signing and notarization
 # live in release.yml, which needs Apple and Windows signing credentials; this
 # workflow deliberately does not, so anyone can produce installers from a fork.
+#
+# Pushing a v* tag also publishes a GitHub Release carrying the installers, which
+# is the download page users land on. Note that the app itself does not update
+# from these releases: this fork disables auto-update, because the upstream
+# channel belongs to the vendor and macOS self-update needs a Developer ID
+# signature an unsigned build does not have. See `update-policy.ts`.
 
 on:
   workflow_dispatch:
@@ -26,8 +32,8 @@ jobs:
       matrix:
         arch: [arm64, x64]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -41,7 +47,7 @@ jobs:
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
         run: npx electron-builder --mac --${{ matrix.arch }} --publish never
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: dsh-desktop-macos-${{ matrix.arch }}
           path: |
@@ -53,8 +59,8 @@ jobs:
     name: Windows x64
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -66,8 +72,39 @@ jobs:
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
         run: npx electron-builder --win --x64 --publish never
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: dsh-desktop-windows-x64
           path: dist/*.exe
           if-no-files-found: error
+
+  release:
+    name: Publish release
+    needs: [macos, windows]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          path: artifacts
+      - name: Attach installers to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find artifacts -type f \( -name '*.dmg' -o -name '*.zip' -o -name '*.exe' \) | sort)
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "No installers were produced; refusing to publish an empty release." >&2
+            exit 1
+          fi
+          printf 'Attaching %d file(s):\n' "${#files[@]}"
+          printf '  %s\n' "${files[@]}"
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "${files[@]}" --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" "${files[@]}" \
+              --title "DSH Desktop $GITHUB_REF_NAME" \
+              --generate-notes
+          fi

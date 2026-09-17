@@ -25,9 +25,15 @@ describe('desktop update policy', () => {
     expect(AUTO_INSTALL_ON_APP_QUIT).toBe(false)
   })
 
-  it('only enables updates for installed macOS and Windows builds', () => {
-    expect(supportsAutoUpdates(true, 'darwin')).toBe(true)
-    expect(supportsAutoUpdates(true, 'win32')).toBe(true)
+  /**
+   * The fork ships no update channel of its own. The upstream one belongs to the
+   * vendor, so taking an update from it would replace this build with theirs;
+   * macOS could not self-install regardless, because Squirrel.Mac requires a
+   * Developer ID signature that an unsigned fork build does not have.
+   */
+  it('keeps auto-updates off on every platform, packaged or not', () => {
+    expect(supportsAutoUpdates(true, 'darwin')).toBe(false)
+    expect(supportsAutoUpdates(true, 'win32')).toBe(false)
     expect(supportsAutoUpdates(true, 'linux')).toBe(false)
     expect(supportsAutoUpdates(false, 'darwin')).toBe(false)
   })

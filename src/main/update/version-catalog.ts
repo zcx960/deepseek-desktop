@@ -2,13 +2,21 @@ import type { AvailableRelease } from '../../shared/contracts'
 
 export type { AvailableRelease }
 
-export const STABLE_FEED_URL = 'https://dshdesktop.com/updates/latest/'
-export const VERSION_INDEX_URL = 'https://dshdesktop.com/updates/versions.json'
+/**
+ * This fork has no `dshdesktop.com`, and must not read the vendor's channel: an
+ * update taken from there installs the *vendor's* build over this one, which
+ * would silently drop Chat mode and the local branding. These point at this
+ * project's own releases instead, so re-enabling the updater is a matter of
+ * flipping the gate in `update-policy.ts` and attaching the `latest*.yml`
+ * manifests electron-builder emits to each release.
+ */
+export const STABLE_FEED_URL = 'https://github.com/zcx960/deepseek-desktop/releases/latest/download/'
+export const VERSION_INDEX_URL = 'https://api.github.com/repos/zcx960/deepseek-desktop/releases'
 
 const INDEX_TIMEOUT_MS = 8_000
 
 export function archiveFeedUrl(version: string): string {
-  return `https://dshdesktop.com/updates/archive/${version}/`
+  return `https://github.com/zcx960/deepseek-desktop/releases/download/v${version}/`
 }
 
 /** Split "1.2.3-rc.1" into ([1,2,3], "rc.1"). Non-numeric segments read as 0. */
@@ -73,24 +81,26 @@ function comparePrerelease(left: string, right: string): -1 | 0 | 1 {
   return 0
 }
 
-function isRelease(value: unknown): value is AvailableRelease {
-  if (typeof value !== 'object' || value === null) return false
-  const record = value as Record<string, unknown>
-  return (
-    typeof record.version === 'string' &&
-    record.version.length > 0 &&
-    typeof record.tag === 'string' &&
-    record.tag.length > 0 &&
-    typeof record.archiveUrl === 'string' &&
-    record.archiveUrl.length > 0
-  )
-}
-
-export function parseVersionIndex(raw: unknown): AvailableRelease[] {
-  if (typeof raw !== 'object' || raw === null) return []
-  const versions = (raw as { versions?: unknown }).versions
-  if (!Array.isArray(versions)) return []
-  return versions.filter(isRelease)
+/**
+ * Read GitHub's release list into the picker's shape.
+ *
+ * The vendor served a bespoke `{ versions: [...] }` index; this project's
+ * releases live on GitHub, whose payload is an array of releases keyed by
+ * `tag_name`. Reading it here keeps the picker working against this project
+ * instead of a channel that no longer exists.
+ */
+export function parseReleaseList(raw: unknown): AvailableRelease[] {
+  if (!Array.isArray(raw)) return []
+  const releases: AvailableRelease[] = []
+  for (const entry of raw) {
+    if (typeof entry !== 'object' || entry === null) continue
+    const record = entry as Record<string, unknown>
+    const tag = record.tag_name
+    const archiveUrl = record.html_url
+    if (typeof tag !== 'string' || !tag || typeof archiveUrl !== 'string' || !archiveUrl) continue
+    releases.push({ version: tag.replace(/^v/, ''), tag, archiveUrl })
+  }
+  return releases
 }
 
 export async function fetchAvailableReleases(
@@ -100,11 +110,14 @@ export async function fetchAvailableReleases(
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), INDEX_TIMEOUT_MS)
   try {
-    const response = await fetchImpl(VERSION_INDEX_URL, { signal: controller.signal })
+    const response = await fetchImpl(VERSION_INDEX_URL, {
+      signal: controller.signal,
+      headers: { accept: 'application/vnd.github+json' }
+    })
     if (!response.ok) {
       throw new Error(`Version index request failed: ${response.status}`)
     }
-    const releases = parseVersionIndex(await response.json())
+    const releases = parseReleaseList(await response.json())
     return releases
       .filter((release) => compareVersions(release.version, currentVersion) !== 0)
       .sort((a, b) => compareVersions(b.version, a.version))

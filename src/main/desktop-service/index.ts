@@ -6,9 +6,28 @@ import { attachDiagnostics } from './diagnostics'
 let service: DesktopService | undefined
 export let desktopDiagnostics: ReturnType<typeof attachDiagnostics> | undefined
 
+/**
+ * Whether to talk to the vendor's desktop service at `https://dshdesktop.com`.
+ *
+ * This fork does not, and it is not a temporary state:
+ *
+ * - The update channel behind it belongs to the vendor. An accepted update would
+ *   download and install *their* build over this one, dropping Chat mode and the
+ *   local branding — the user would have clicked "update" and lost the fork.
+ * - It identifies the installation with a persistent UUID and posts it on every
+ *   update check, with no consent step. A fork should not do that on the user's
+ *   behalf, and this repository has no server that could serve the protocol.
+ *
+ * Leaving `desktopDiagnostics` undefined turns every `desktopDiagnostics?.…`
+ * call site in the composition root into a no-op. `DesktopService` is kept
+ * intact for a future signed build that points it at this project's own
+ * endpoint instead.
+ */
+const VENDOR_DESKTOP_SERVICE_ENABLED = false
+
 /** Call only after the single-instance lock, before bootstrap writes this session's log. */
 export function initializeDesktopService(): void {
-  if (!app.isPackaged || service) return
+  if (!VENDOR_DESKTOP_SERVICE_ENABLED || !app.isPackaged || service) return
   try {
     service = new DesktopService({
       stateDir: join(app.getPath('userData'), 'desktop-service'),

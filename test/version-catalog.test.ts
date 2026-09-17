@@ -3,19 +3,32 @@ import {
   archiveFeedUrl,
   compareVersions,
   fetchAvailableReleases,
-  parseVersionIndex,
+  parseReleaseList,
   STABLE_FEED_URL,
   VERSION_INDEX_URL
 } from '../src/main/update/version-catalog'
 
 describe('version-catalog constants', () => {
-  it('points the stable feed and index at the dshdesktop domain', () => {
-    expect(STABLE_FEED_URL).toBe('https://dshdesktop.com/updates/latest/')
-    expect(VERSION_INDEX_URL).toBe('https://dshdesktop.com/updates/versions.json')
+  /**
+   * These must not point at the vendor's channel: an update taken from
+   * `dshdesktop.com` installs the vendor's build over this fork, dropping Chat
+   * mode and the local branding.
+   */
+  it('points the stable feed and index at this project rather than the vendor', () => {
+    expect(STABLE_FEED_URL).toBe(
+      'https://github.com/zcx960/deepseek-desktop/releases/latest/download/'
+    )
+    expect(VERSION_INDEX_URL).toBe(
+      'https://api.github.com/repos/zcx960/deepseek-desktop/releases'
+    )
+    expect(STABLE_FEED_URL).not.toContain('dshdesktop.com')
+    expect(VERSION_INDEX_URL).not.toContain('dshdesktop.com')
   })
 
   it('builds a per-version archive feed url with a trailing slash', () => {
-    expect(archiveFeedUrl('1.2.3')).toBe('https://dshdesktop.com/updates/archive/1.2.3/')
+    expect(archiveFeedUrl('1.2.3')).toBe(
+      'https://github.com/zcx960/deepseek-desktop/releases/download/v1.2.3/'
+    )
   })
 })
 
@@ -50,36 +63,41 @@ describe('compareVersions', () => {
   })
 })
 
-describe('parseVersionIndex', () => {
-  it('keeps well-formed entries and drops the rest', () => {
-    const raw = {
-      versions: [
-        { version: '1.2.3', tag: 'v1.2.3', archiveUrl: 'https://dshdesktop.com/updates/archive/1.2.3/' },
-        { version: '', tag: 'v0', archiveUrl: 'x' },
-        { nope: true },
-        42
-      ]
-    }
-    expect(parseVersionIndex(raw)).toEqual([
-      { version: '1.2.3', tag: 'v1.2.3', archiveUrl: 'https://dshdesktop.com/updates/archive/1.2.3/' }
+describe('parseReleaseList', () => {
+  it('reads GitHub tags into the picker shape and drops entries without one', () => {
+    const raw = [
+      {
+        tag_name: 'v1.2.3',
+        html_url: 'https://github.com/zcx960/deepseek-desktop/releases/tag/v1.2.3'
+      },
+      { tag_name: '', html_url: 'https://example.test/empty-tag' },
+      { tag_name: 'v1.2.4' },
+      { nope: true },
+      42
+    ]
+    expect(parseReleaseList(raw)).toEqual([
+      {
+        version: '1.2.3',
+        tag: 'v1.2.3',
+        archiveUrl: 'https://github.com/zcx960/deepseek-desktop/releases/tag/v1.2.3'
+      }
     ])
   })
 
-  it('returns an empty array for non-objects or a missing versions array', () => {
-    expect(parseVersionIndex(null)).toEqual([])
-    expect(parseVersionIndex({})).toEqual([])
-    expect(parseVersionIndex('nope')).toEqual([])
+  it('returns an empty array when the payload is not a release list', () => {
+    expect(parseReleaseList(null)).toEqual([])
+    expect(parseReleaseList({ versions: [] })).toEqual([])
+    expect(parseReleaseList('nope')).toEqual([])
   })
 })
 
 describe('fetchAvailableReleases', () => {
-  const index = {
-    versions: [
-      { version: '1.0.0', tag: 'v1.0.0', archiveUrl: 'a' },
-      { version: '1.2.0', tag: 'v1.2.0', archiveUrl: 'b' },
-      { version: '1.1.0', tag: 'v1.1.0', archiveUrl: 'c' }
-    ]
-  }
+  // GitHub's release list, which is an array keyed by tag_name.
+  const index = [
+    { tag_name: 'v1.0.0', html_url: 'a' },
+    { tag_name: 'v1.2.0', html_url: 'b' },
+    { tag_name: 'v1.1.0', html_url: 'c' }
+  ]
   const ok = () =>
     Promise.resolve({ ok: true, json: () => Promise.resolve(index) } as Response)
 
