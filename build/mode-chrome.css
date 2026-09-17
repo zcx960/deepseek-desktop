@@ -1,0 +1,266 @@
+:root {
+  --chrome-raised: #ffffff;
+  --chrome-border: rgba(20, 24, 28, 0.14);
+  --chrome-text: #202428;
+  --chrome-muted: #60676f;
+  --chrome-accent: #087f71;
+  --chrome-accent-soft: rgba(8, 127, 113, 0.13);
+  --chrome-danger: #a63d32;
+  --chrome-switch-track: rgba(32, 36, 40, 0.08);
+  --chrome-switch-highlight: rgba(255, 255, 255, 0.96);
+  --chrome-switch-shadow: 0 1px 3px rgba(20, 24, 28, 0.18);
+  position: fixed;
+  inset: 0;
+  color: var(--chrome-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+  letter-spacing: 0;
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --chrome-raised: #34383c;
+  --chrome-border: rgba(255, 255, 255, 0.13);
+  --chrome-text: #f1f3f4;
+  --chrome-muted: #aeb4ba;
+  --chrome-accent: #55c8b8;
+  --chrome-accent-soft: rgba(85, 200, 184, 0.17);
+  --chrome-danger: #f08a80;
+  --chrome-switch-track: rgba(255, 255, 255, 0.1);
+  --chrome-switch-highlight: #454a4f;
+  --chrome-switch-shadow: 0 1px 3px rgba(0, 0, 0, 0.34);
+  color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --chrome-raised: #34383c;
+    --chrome-border: rgba(255, 255, 255, 0.13);
+    --chrome-text: #f1f3f4;
+    --chrome-muted: #aeb4ba;
+    --chrome-accent: #55c8b8;
+    --chrome-accent-soft: rgba(85, 200, 184, 0.17);
+    --chrome-danger: #f08a80;
+    --chrome-switch-track: rgba(255, 255, 255, 0.1);
+    --chrome-switch-highlight: #454a4f;
+    --chrome-switch-shadow: 0 1px 3px rgba(0, 0, 0, 0.34);
+    color-scheme: dark;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: transparent;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+#mode-chrome-root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+#chrome-controls,
+#mode-switch,
+#chat-menu,
+dialog {
+  -webkit-app-region: no-drag;
+  pointer-events: auto;
+}
+
+#chrome-controls {
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  width: 100%;
+  height: 32px;
+  align-items: center;
+  gap: 4px;
+}
+
+button {
+  min-width: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: 0;
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease, opacity 160ms ease, transform 160ms ease;
+}
+
+button:hover {
+  background: var(--chrome-accent-soft);
+}
+
+button:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+button:focus-visible {
+  outline: 2px solid var(--chrome-accent);
+  outline-offset: -2px;
+}
+
+#mode-switch {
+  position: relative;
+  display: grid;
+  flex: none;
+  grid-template-columns: repeat(2, 82px);
+  width: 164px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--chrome-switch-track);
+  box-shadow: inset 0 0 0 1px rgba(127, 127, 127, 0.04);
+}
+
+#mode-highlight {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  z-index: 0;
+  width: 78px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--chrome-switch-highlight);
+  box-shadow: var(--chrome-switch-shadow);
+  pointer-events: none;
+  transition: transform 160ms ease;
+}
+
+:root[data-mode='harness'] #mode-highlight {
+  transform: translateX(82px);
+}
+
+#mode-switch button {
+  position: relative;
+  z-index: 1;
+  width: 82px;
+  height: 32px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--chrome-muted);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 32px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+#mode-switch button:hover,
+#mode-switch button:active {
+  background: transparent;
+  color: var(--chrome-text);
+  transform: none;
+}
+
+#mode-switch button[aria-checked='true'] {
+  color: var(--chrome-text);
+}
+
+#chat-actions {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: var(--chrome-muted);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+#chat-menu {
+  position: fixed;
+  top: 38px;
+  right: 0;
+  display: grid;
+  width: min(184px, 100vw);
+  padding: 7px;
+  border: 1px solid var(--chrome-border);
+  border-radius: 8px;
+  background: var(--chrome-raised);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.24);
+  animation: menu-in 160ms ease-out;
+}
+
+#chat-menu {
+  padding: 5px;
+}
+
+#chat-menu button {
+  width: 100%;
+  min-height: 34px;
+  padding: 0 10px;
+  border-color: transparent;
+  text-align: left;
+}
+
+#chat-menu #clear-chat-data {
+  color: var(--chrome-danger);
+}
+
+dialog {
+  width: min(420px, calc(100vw - 32px));
+  padding: 20px;
+  border: 1px solid var(--chrome-border);
+  border-radius: 8px;
+  background: var(--chrome-raised);
+  color: var(--chrome-text);
+  box-shadow: 0 20px 54px rgba(0, 0, 0, 0.28);
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.42);
+}
+
+dialog p {
+  margin: 0 0 20px;
+  line-height: 1.5;
+}
+
+dialog form {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+#confirm-clear {
+  border-color: transparent;
+  background: var(--chrome-accent);
+  color: #ffffff;
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-5px) scale(0.985);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button,
+  #mode-highlight,
+  #chat-menu {
+    animation: none;
+    transition: none;
+  }
+}
