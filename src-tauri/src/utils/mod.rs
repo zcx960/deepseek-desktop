@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use tauri::{AppHandle, Manager, Runtime, WebviewWindow};
+use tauri::{AppHandle, Manager, Runtime, Window};
 
 use crate::config;
 use crate::service::core::{active_source, local_core_package_dir, CoreSource};
@@ -79,7 +79,7 @@ pub fn dsh_rel_contains(app_handle: &tauri::AppHandle, rel_path: &str, needle: &
     }
 }
 
-pub fn show_window<R: Runtime>(window: &WebviewWindow<R>) {
+pub fn show_window<R: Runtime>(window: &Window<R>) {
     let _ = window.unminimize();
     let _ = window.show();
     let _ = window.set_focus();
@@ -89,7 +89,7 @@ pub fn show_window<R: Runtime>(window: &WebviewWindow<R>) {
 /// 关闭按钮只隐藏窗口（见 builder 的 on_window_event），所以这里取到即可 show；
 /// 若窗口确实不存在（非预期路径），仅记录日志，不重建。
 pub fn show_main_window<R: Runtime>(app: &AppHandle<R>) {
-    if let Some(window) = app.get_webview_window("main") {
+    if let Some(window) = app.get_window("main") {
         // 关窗驻留用的是应用级 hide（NSApp hide:，见 builder 的 CloseRequested），
         // 恢复前必须先 unhide 整个应用，否则 window.show() 在隐藏态应用上不可见。
         #[cfg(target_os = "macos")]

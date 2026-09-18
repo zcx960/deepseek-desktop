@@ -23,14 +23,14 @@ Chat is the official `https://chat.deepseek.com/` experience rendered by a Tauri
 1. The shell starts and reads the persisted mode.
 2. Rust builds the main window and registers the Chat WebView manager.
 3. The shell sends the selected mode to Rust.
-4. Rust creates the Chat WebView on first Chat selection, using an application-data subdirectory dedicated to Chat.
-5. Rust positions the child WebView at the content origin below the 52px shell navigation and resizes it with the main window.
+4. Rust creates the Chat WebView on first Chat selection, using an application-data subdirectory on Windows/Linux or an isolated WebKit data store on macOS 14+.
+5. Rust positions the child WebView at the measured content origin below the shell navigation (52px at 100% zoom) and resizes it with the main window.
 6. Rust emits status events; React renders the switch and failure surfaces.
-7. Chat navigation is allowed only for the official Chat origin and the explicit official authentication origins required by the observed login flow. Other HTTP(S) URLs open through the system opener; non-web schemes are rejected.
+7. Chat navigation is allowed only for the exact official Chat origin. No additional authentication origins are trusted. Other HTTP(S) URLs open through the system opener; non-web schemes are rejected.
 
 ## Storage and clearing
 
-The Chat WebView receives its own data directory. Clearing Chat data hides and destroys the WebView, removes that directory, and marks the surface uncreated. The next Chat selection creates a fresh profile. Harness settings, profiles, sessions, and its WebView data remain untouched.
+The Chat WebView receives a separate persistent profile. Clearing first blanks all Chat pages and waits for navigation completion, closes the views, then awaits WebKit data clearing on macOS or removes the owned directory on Windows/Linux. A successful clear advances the stored profile generation and recreates selected Chat views. Harness settings, profiles, sessions, and its WebView data remain untouched. macOS versions before 14 show a browser fallback because they cannot provide an isolated persistent WebKit store.
 
 ## Failure behavior
 
@@ -38,8 +38,8 @@ Chat failures do not change Harness status. A failed Chat surface remains select
 
 ## Security
 
-The Chat child WebView receives no shell command permissions. Navigation checks run in Rust before every top-level navigation. New-window requests do not create unrestricted child windows: official Chat/auth URLs stay in Chat; unrelated web URLs go to the system browser; other protocols are rejected. The shell does not read Chat cookies, page storage, or page content.
+The Chat child WebView receives no shell command permissions. Navigation checks run in Rust before every top-level navigation. New-window requests do not create unrestricted child windows: official Chat URLs stay in Chat; unrelated web URLs go to the system browser; other protocols are rejected. The shell does not read Chat cookies, page storage, or page content.
 
 ## Testing
 
-Rust unit tests cover URL policy, data-directory selection, bounds calculation, lifecycle idempotence, stale status events, and clear-data ordering. React tests cover mode restoration, transition serialization, localized switch rendering, and failure/retry actions. A desktop smoke test verifies that both WebViews can be selected in one window and that Chat remains logged in after a mode switch.
+Rust unit tests cover navigation policy, bounds validation, and stale load settlements. Store tests cover mode restoration, transition serialization, failure/retry, stale events, and clear actions. Native macOS smoke checks cover retained drafts, persistent profile identity after restart, clear cancellation, profile reset without changing Harness, command denial, settings overlays, and fullscreen. The official login page is loaded separately; no account credentials are entered.

@@ -1,3 +1,5 @@
+> **Chat 增强版**：此分支基于 Tauri 桌面端 0.15.4，新增顶部 **Harness / Chat** 切换、官方 Chat 独立登录存储、恢复上次模式和清除 Chat 数据。macOS 内嵌 Chat 需要 14 或更高版本。桌面应用使用独立标识，暂不接收上游桌面自动更新；Harness 内核更新保留。详见 [Chat 使用与开发说明](docs/CHAT_MODE.md)。
+
 <p align="center">
   <a href="https://github.com/dsh-tauri-desk/deepseek-harness-desktop">
     <img src="public/favicon.svg" width="96" alt="DeepSeek Harness Desktop" />

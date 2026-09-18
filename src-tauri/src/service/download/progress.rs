@@ -1,7 +1,7 @@
 use serde::Serialize;
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
-use tauri::{Emitter, Runtime, WebviewWindow};
+use tauri::{Emitter, Runtime, Webview};
 
 #[derive(Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -16,7 +16,7 @@ pub struct ProgressPayload {
 }
 
 pub struct ProgressTracker<'a, R: Runtime> {
-    window: &'a WebviewWindow<R>,
+    window: &'a Webview<R>,
     total_phases: usize,
     current_phase: usize,
     current_title: String,
@@ -25,7 +25,7 @@ pub struct ProgressTracker<'a, R: Runtime> {
 }
 
 impl<'a, R: Runtime> ProgressTracker<'a, R> {
-    pub fn new(window: &'a WebviewWindow<R>, task_count: usize) -> Self {
+    pub fn new(window: &'a Webview<R>, task_count: usize) -> Self {
         Self {
             window,
             total_phases: task_count,

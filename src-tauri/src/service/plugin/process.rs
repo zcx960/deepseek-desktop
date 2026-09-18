@@ -12,7 +12,7 @@ use std::io::{BufRead, BufReader, Read};
 use std::path::Path;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
-use tauri::{Emitter, WebviewWindow};
+use tauri::{Emitter, Webview};
 
 #[cfg(windows)]
 use crate::service::workflow;
@@ -217,7 +217,7 @@ pub(crate) async fn run_plugin_process(
     args: &[OsString],
     cwd: &Path,
     envs: &HashMap<String, String>,
-    window: &WebviewWindow,
+    window: &Webview,
     owner: ProcessOwner,
 ) -> Result<(i32, String), String> {
     let process_guard = acquire_process_lock().await?;
@@ -315,7 +315,7 @@ fn drain_captured(captured: Arc<Mutex<String>>) -> String {
 /// 使用静态泛型约束 `R: Read + Send + 'static` 避免动态派发（Box<dyn Read>）堆分配。
 fn spawn_line_emitter<R: Read + Send + 'static>(
     reader: R,
-    window: WebviewWindow,
+    window: Webview,
     captured: Arc<Mutex<String>>,
 ) {
     std::thread::spawn(move || {

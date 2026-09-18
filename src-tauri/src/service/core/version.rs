@@ -508,7 +508,7 @@ pub async fn download_version(app_handle: &AppHandle, tag: &str) -> Result<Harne
     // 2. 下载 + 校验 + 原子解压到历史槽位（两阶段进度：下载 0-50，解压 50-100）
     //    下载默认走 GitHub 官方直连，失败自动切换 ghfast.top 镜像兜底。
     let window = app_handle
-        .get_webview_window("main")
+        .get_webview("main")
         .ok_or("WINDOW_NOT_FOUND: main window missing")?;
     let mut tracker = download::ProgressTracker::new(&window, 2);
     tracker.start_phase("download", &format!("正在下载核心版本 {tag}"));

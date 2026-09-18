@@ -956,12 +956,13 @@ dependencies = [
 
 [[package]]
 name = "deepseek-harness-desktop"
-version = "0.15.4"
+version = "0.15.4-chat.1"
 dependencies = [
  "arboard",
  "async-trait",
  "auto-launch",
  "base64 0.22.1",
+ "block2",
  "core-foundation 0.10.1",
  "core-graphics 0.25.0",
  "dunce",
@@ -970,7 +971,9 @@ dependencies = [
  "image",
  "libc",
  "log",
+ "objc2",
  "objc2-foundation",
+ "objc2-web-kit",
  "rayon",
  "rdev",
  "regex",

@@ -241,7 +241,7 @@ async fn run_single_plugin_command(
         return Err("PLUGIN_EMPTY_ID: plugin id is empty".to_string());
     }
     let window = app_handle
-        .get_webview_window("main")
+        .get_webview("main")
         .ok_or("WINDOW_NOT_FOUND: main window missing")?;
 
     cli::ensure_shims(app_handle)?;

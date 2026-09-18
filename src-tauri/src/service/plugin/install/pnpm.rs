@@ -16,7 +16,7 @@ use std::io::Read;
 use std::path::Path;
 #[cfg(test)]
 use std::path::PathBuf;
-use tauri::{AppHandle, Emitter, WebviewWindow};
+use tauri::{AppHandle, Emitter, Webview};
 
 use super::acquire_process_lock;
 use super::profile_dir;
@@ -34,7 +34,7 @@ const PNPM_PROBE_LIVENESS_INTERVAL: std::time::Duration = std::time::Duration::f
 
 pub(super) async fn ensure_pnpm(
     app_handle: &AppHandle,
-    window: &WebviewWindow,
+    window: &Webview,
     owner: ProcessOwner,
 ) -> Result<bool, String> {
     // 档案的 node_modules 由哪个 pnpm 主版本创建（.modules.yaml 的 storeDir 段）

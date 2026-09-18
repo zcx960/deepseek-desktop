@@ -1,6 +1,9 @@
 pub mod activation;
 pub mod autostart;
 pub mod builder;
+pub mod chat;
+pub mod chat_policy;
+mod chat_profile;
 pub mod compat;
 #[cfg(target_os = "linux")]
 pub mod linux_tray;

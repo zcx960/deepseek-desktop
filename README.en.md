@@ -1,3 +1,5 @@
+> **Chat edition**: this fork builds on Tauri desktop 0.15.4 and adds **Harness / Chat** switching, isolated persistent official Chat login, last-mode restoration, and clear Chat data. Embedded Chat requires macOS 14 or newer. It has a separate application identity and manual desktop updates; Harness core updates remain available. See [Chat mode](docs/CHAT_MODE.md).
+
 <p align="center">
   <a href="https://github.com/dsh-tauri-desk/deepseek-harness-desktop">
     <img src="public/favicon.svg" width="96" alt="DeepSeek Harness Desktop" />

@@ -74,7 +74,7 @@ fn parse_theme_preference(content: &str) -> Option<DshTheme> {
 /// 可同步，无需（也无从）调用。
 #[cfg(target_os = "macos")]
 pub fn apply_window_theme(app_handle: &AppHandle, theme: DshTheme) {
-    let Some(window) = app_handle.get_webview_window("main") else {
+    let Some(window) = app_handle.get_window("main") else {
         log::debug!("apply_window_theme: main window not built yet");
         return;
     };

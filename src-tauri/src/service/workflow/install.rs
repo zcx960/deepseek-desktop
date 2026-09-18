@@ -44,7 +44,7 @@ pub async fn install(
     }
 
     let window = app_handle
-        .get_webview_window("main")
+        .get_webview("main")
         .ok_or("Failed to get main window")?;
     log::debug!("Main window obtained");
     // 仅 Windows 会继续 push MinGit 任务（见下方 `#[cfg(windows)]`），

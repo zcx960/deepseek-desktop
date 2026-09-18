@@ -39,7 +39,7 @@ use crate::service::workflow;
 use std::collections::HashMap;
 use std::ffi::OsString;
 use std::path::Path;
-use tauri::{AppHandle, Emitter, Manager, WebviewWindow};
+use tauri::{AppHandle, Emitter, Manager, Webview};
 
 // plugin 兄弟模块的再导出：子模块经 `super::` 统一从这里取，跨模块边界只在此定义。
 pub(crate) use super::ensure_profile_npmrc;
@@ -197,7 +197,7 @@ async fn install_with_cancel(
     }
 
     let window = app_handle
-        .get_webview_window("main")
+        .get_webview("main")
         .ok_or("WINDOW_NOT_FOUND: main window missing")?;
 
     // 选定/补齐安装用的 pnpm：返回是否应强制使用捆绑版（版本感知，见 ensure_pnpm）
@@ -387,7 +387,7 @@ async fn run_plugin_with_allow_build_retry(
     args: &[OsString],
     cwd: &Path,
     envs: &HashMap<String, String>,
-    window: &WebviewWindow,
+    window: &Webview,
     action: &str,
     cancel: Option<&tokio::sync::watch::Receiver<bool>>,
     owner: ProcessOwner,
@@ -453,7 +453,7 @@ async fn run_plugin_install_with_transient_retry(
     args: &[OsString],
     cwd: &Path,
     envs: &HashMap<String, String>,
-    window: &WebviewWindow,
+    window: &Webview,
     action: &str,
     cancel: Option<&tokio::sync::watch::Receiver<bool>>,
     owner: ProcessOwner,

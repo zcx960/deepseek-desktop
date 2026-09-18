@@ -19,7 +19,7 @@ pub const CLOSE_ACTION_QUIT: &str = "quit";
 #[cfg(target_os = "macos")]
 use std::sync::{Mutex, OnceLock};
 
-use tauri::{AppHandle, Runtime, WebviewWindow, Window};
+use tauri::{AppHandle, Runtime, Window};
 // macOS 侧需要 Manager（从窗口取回 AppHandle）与 ActivationPolicy 下发应用级策略
 #[cfg(target_os = "macos")]
 use tauri::{ActivationPolicy, Manager};
@@ -175,7 +175,7 @@ pub fn set_regular_policy<R: Runtime>(app: &AppHandle<R>) {
 /// ⌘-Tab 将在整个托盘驻留期间保持可见，与 `ui.close_action_hint`
 /// 的承诺矛盾。仅当关窗动作是 `tray` 时挂起。
 #[cfg_attr(not(target_os = "macos"), allow(unused_variables))]
-pub fn rearm_pending_accessory_if_fullscreen<R: Runtime>(window: &WebviewWindow<R>) {
+pub fn rearm_pending_accessory_if_fullscreen<R: Runtime>(window: &Window<R>) {
     #[cfg(target_os = "macos")]
     {
         let Ok(is_fullscreen) = window.is_fullscreen() else {
@@ -184,8 +184,7 @@ pub fn rearm_pending_accessory_if_fullscreen<R: Runtime>(window: &WebviewWindow<
         if !is_fullscreen {
             return;
         }
-        let close_action =
-            crate::config::get_store_dat_setting(&window.app_handle()).close_action;
+        let close_action = crate::config::get_store_dat_setting(&window.app_handle()).close_action;
         if should_switch_to_accessory(false, &close_action) {
             set_pending_accessory(true);
         }

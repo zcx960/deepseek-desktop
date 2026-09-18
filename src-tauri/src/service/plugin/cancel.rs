@@ -87,7 +87,7 @@ pub(crate) fn terminate_pid_tree(pid: u32) -> bool {
 pub async fn cancel(app_handle: &AppHandle) {
     terminate_active_install().await;
 
-    if let Some(window) = app_handle.get_webview_window("main") {
+    if let Some(window) = app_handle.get_webview("main") {
         let _ = window.emit(PREINSTALL_CANCEL_EVENT, PreinstallCancelPayload {});
     }
 }

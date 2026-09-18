@@ -1,15 +1,12 @@
-use std::sync::atomic::{AtomicU64, Ordering};
 #[cfg(windows)]
 use std::sync::atomic::AtomicBool;
+use std::sync::atomic::{AtomicU64, Ordering};
 #[cfg(windows)]
 use std::sync::Arc;
 #[cfg(target_os = "macos")]
 use std::sync::{Mutex, OnceLock};
 
-use tauri::{
-    ipc::Invoke,
-    Emitter, Manager, Runtime, WebviewUrl, WebviewWindowBuilder, Wry,
-};
+use tauri::{ipc::Invoke, Emitter, Manager, Runtime, WebviewUrl, WebviewWindowBuilder, Wry};
 
 // 托盘相关的 tauri 类型只在非 Linux 路径使用：Linux 走 desktop::linux_tray 的
 // KSNI 托盘（见该文件的背景说明），届时这些导入会变成未使用。
@@ -90,6 +87,10 @@ fn webview_data_directory(app: &tauri::AppHandle<Wry>) -> std::path::PathBuf {
 
 /// setup app
 pub fn setup(app_handle: tauri::AppHandle) {
+    #[cfg(debug_assertions)]
+    if std::env::var("DSH_DESKTOP_SMOKE").as_deref() == Ok("1") {
+        return;
+    }
     // 升级清理：内置插件已迁至 resources/node_modules（pnpm deploy 产物）；旧安装
     // 可能残留 resources/preset-plugins 与 resources/internal-plugins 目录。仅删除
     // 旧目录，失败告警并继续启动（查找回退见 preset::find_bundled_in_root）。
@@ -215,7 +216,7 @@ pub fn tray<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<()> {
         .icon_as_template(true)
         .menu(&menu)
         .show_menu_on_left_click(false)
-        .tooltip("Deepseek Harness Desktop")
+        .tooltip("DeepSeek Desktop Chat")
         .on_menu_event(move |app, event| handle_menu_event(app, &event))
         .on_tray_icon_event(move |tray, event| handle_tray_icon_event(tray, &event))
         .build(app)?;
@@ -225,7 +226,7 @@ pub fn tray<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<()> {
         .icon(icon)
         .menu(&menu)
         .show_menu_on_left_click(false)
-        .tooltip("Deepseek Harness Desktop")
+        .tooltip("DeepSeek Desktop Chat")
         .on_menu_event(move |app, event| handle_menu_event(app, &event))
         .on_tray_icon_event(move |tray, event| handle_tray_icon_event(tray, &event))
         .build(app)?;
@@ -254,7 +255,7 @@ pub fn install_macos_menu(app: &tauri::AppHandle<Wry>) -> tauri::Result<()> {
     )?;
     let application_separator = PredefinedMenuItem::separator(app)?;
     let is_fullscreen = app
-        .get_webview_window("main")
+        .get_window("main")
         .and_then(|window| window.is_fullscreen().ok())
         .unwrap_or(false);
     let fullscreen_label = crate::config::i18n::t(if is_fullscreen {
@@ -481,7 +482,7 @@ pub fn build_main_window(app: &tauri::AppHandle<Wry>) -> tauri::Result<tauri::We
 
     let webview_builder =
         WebviewWindowBuilder::new(app, MAIN_WINDOW_LABEL, WebviewUrl::App("index.html".into()))
-            .title("Deepseek Harness Desktop")
+            .title("DeepSeek Desktop Chat")
             .inner_size(1280.0, 840.0)
             .min_inner_size(860.0, 620.0)
             .resizable(true);
@@ -618,7 +619,7 @@ pub fn build_extra_window(app: &tauri::AppHandle<Wry>) -> tauri::Result<tauri::W
 
     let webview_builder =
         WebviewWindowBuilder::new(app, label, WebviewUrl::App("index.html".into()))
-            .title("Deepseek Harness Desktop")
+            .title("DeepSeek Desktop Chat")
             .inner_size(1280.0, 840.0)
             .min_inner_size(860.0, 620.0)
             .resizable(true);
@@ -863,7 +864,13 @@ mod macos_bundle_tests {
 
 // configure invoke handler
 pub fn handler() -> impl Fn(Invoke<Wry>) -> bool + Send + Sync + 'static {
-    tauri::generate_handler![
+    let dispatch: Box<dyn Fn(Invoke<Wry>) -> bool + Send + Sync> = Box::new(tauri::generate_handler![
+        crate::desktop::chat::desktop_chat_select,
+        crate::desktop::chat::desktop_chat_status,
+        crate::desktop::chat::desktop_chat_layout,
+        crate::desktop::chat::desktop_chat_retry,
+        crate::desktop::chat::desktop_chat_clear,
+        crate::desktop::chat::desktop_chat_open_browser,
         crate::bridge::install_dependencies,
         crate::bridge::check_dsh_update,
         crate::bridge::launch_harness,
@@ -950,12 +957,22 @@ pub fn handler() -> impl Fn(Invoke<Wry>) -> bool + Send + Sync + 'static {
         crate::bridge::get_pet_asset,
         crate::bridge::list_preset_pets,
         crate::desktop::pet_mouse::start_pet_mouse_stream,
-    ]
+    ]);
+    move |invoke: Invoke<Wry>| {
+        if crate::desktop::chat_policy::is_chat_label(invoke.message.webview_ref().label()) {
+            invoke
+                .resolver
+                .reject("CHAT_FORBIDDEN: remote Chat has no desktop command access");
+            return true;
+        }
+        dispatch(invoke)
+    }
 }
 
 // configure tauri builder
 pub fn builder() -> tauri::Builder<tauri::Wry> {
     let builder = tauri::Builder::default()
+        .manage(crate::desktop::chat::ChatManager::default())
         .manage(crate::desktop::pet_mouse::PetMouseStreamState::default())
         .setup(|app| {
             let app_handle = app.handle().clone();
@@ -1003,6 +1020,9 @@ pub fn builder() -> tauri::Builder<tauri::Wry> {
         // `activation::on_window_hidden` 仅在 macOS 上有实现，故它保留 macOS 门控。
         // 点击关闭按钮时按设置决定：隐藏到托盘驻留，还是完整退出程序
         .on_window_event(|window, event| match event {
+            tauri::WindowEvent::Destroyed => {
+                crate::desktop::chat::forget_window(window.app_handle(), window.label());
+            }
             tauri::WindowEvent::CloseRequested { api, .. } => {
                 if window.label() == crate::desktop::pet::PET_WINDOW_LABEL {
                     // 桌宠窗口没有装饰按钮，但 Alt+F4 / 系统关闭仍会走到这里：语义等同

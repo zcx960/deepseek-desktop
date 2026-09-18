@@ -43,3 +43,7 @@ To add a new built-in (internal) plugin bundled with the app, see [Built-in (Int
 
 - Debug mode serves on port **3081**, release builds on **3080** — the two never clash, so you can run an installed copy and a dev build side by side.
 - Debug data is isolated from release data: it uses `~/.dsh.dev` and `.store.dev.dat`; it does not migrate release data or register a production `dsh` PATH shim.
+
+## Chat edition
+
+The Chat integration, native smoke workflow, storage rules, and fork update policy are documented in [Chat mode](CHAT_MODE.md).

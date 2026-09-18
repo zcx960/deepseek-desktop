@@ -22,6 +22,7 @@ export default defineConfig({
   },
   test: {
     include: [
+      'test/desktop-mode*.test.ts',
       'packages/**/*.{test,spec}.{ts,tsx,js,mjs,cjs}',
       'test/toast.test.ts',
       // issue #469：桌面端不得持有屏幕唤醒锁（壳层用 reause useWakeLock 释放，桌宠 <video> 会间接加锁）。

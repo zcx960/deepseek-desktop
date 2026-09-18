@@ -49,3 +49,7 @@ const UPDATES_DIR: &str = "updates";
 /// 慢镜像下 120s 会掐断合法下载，故放宽到 30 分钟；真正断死的连接会由流读取
 /// 报错提前退出，不会真的等到超时。
 const DOWNLOAD_TIMEOUT_SECS: u64 = 1800;
+
+pub fn enabled(app: &tauri::AppHandle) -> bool {
+    app.config().identifier == "io.github.hairyf.deepseek-harness-desktop"
+}

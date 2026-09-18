@@ -1,11 +1,13 @@
 import { useRef, useState } from 'react'
 import { If } from 'react-if-lite'
 import { useStore } from 'valtio-define'
+import { useChatLayout } from '@/hooks/use-chat-layout'
 import { useDshStyle } from '@/hooks/use-dsh-style'
 import { useIframeMessage } from '@/hooks/use-iframe-message'
 import { useIframePost } from '@/hooks/use-iframe-post'
 import { store } from '@/store'
 import { Recovery } from '@/ui/plugin/recovery'
+import { ChatSurface } from './chat-surface'
 import { Iframe } from './iframe'
 import { Navbar } from './navbar'
 import { Setup } from './setup'
@@ -30,6 +32,9 @@ export function Webview() {
   // 1. 状态与引用声明
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
+  const mode = useStore(store.desktopMode)
+  useChatLayout(contentRef)
   const post = useIframePost(iframeRef)
 
   const [dshStyle] = useDshStyle()
@@ -62,17 +67,27 @@ export function Webview() {
     }
   }
 
+  function harnessAction(type: string) {
+    if (mode.selected === 'harness' && status === 'ready')
+      post({ type })
+  }
+
   // 5. 统一布局输出
   return (
     <main className="relative flex flex-col min-h-0 flex-1" style={dshStyle.frame || {}}>
       <Navbar
         sidebarCollapsed={sidebarCollapsed}
-        onToggleSidebar={() => post({ type: 'dsh://sidebar:toggle' })}
-        onNewChat={() => post({ type: 'dsh://session:new' })}
-        onOpenFolder={() => post({ type: 'dsh://workspace:add' })}
+        onToggleSidebar={mode.selected === 'harness' && status === 'ready' ? () => harnessAction('dsh://sidebar:toggle') : undefined}
+        onNewChat={mode.selected === 'harness' && status === 'ready' ? () => harnessAction('dsh://session:new') : undefined}
+        onOpenFolder={mode.selected === 'harness' && status === 'ready' ? () => harnessAction('dsh://workspace:add') : undefined}
       />
-      <div className="flex min-h-0 flex-1">
-        {renderContent()}
+      <div ref={contentRef} className="relative flex min-h-0 flex-1">
+        <div className="flex min-h-0 flex-1" hidden={mode.selected !== 'harness'} style={{ display: mode.selected === 'harness' ? 'flex' : 'none' }}>
+          {renderContent()}
+        </div>
+        <If cond={mode.selected === 'chat'}>
+          <ChatSurface />
+        </If>
       </div>
     </main>
   )

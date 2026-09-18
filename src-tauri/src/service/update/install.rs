@@ -53,6 +53,9 @@ pub struct DesktopUpdateInfo {
 
 /// 检查是否有新版本可用（含安装包是否已下载）
 pub async fn check(app_handle: &AppHandle) -> Result<Option<DesktopUpdateInfo>, String> {
+    if !super::enabled(app_handle) {
+        return Err("DESKTOP_UPDATES_DISABLED: this Chat build uses manual desktop updates".into());
+    }
     match fetch_latest_release().await? {
         None => Ok(None),
         Some(r) => {
@@ -217,6 +220,9 @@ fn verify_installer_sha256(path: &std::path::Path, expected: &str) -> Result<(),
 /// 宁可失败，防止第三方镜像投毒未被察觉；官方 GitHub 直连在摘要缺失时仍可
 /// 按旧行为下载（兼容早期未填摘要的发布），下载后若有摘要则强制校验。
 pub async fn download(app_handle: &AppHandle) -> Result<DesktopUpdateInfo, String> {
+    if !super::enabled(app_handle) {
+        return Err("DESKTOP_UPDATES_DISABLED: this Chat build uses manual desktop updates".into());
+    }
     let release = fetch_latest_release()
         .await?
         .ok_or_else(|| "UPDATE_NONE".to_string())?;
@@ -401,6 +407,9 @@ pub(super) fn open_installer_now(app_handle: &AppHandle, path: &str) -> Result<(
 
 /// 打开安装包：交给系统默认处理器（Windows 会触发 UAC 执行安装器）。
 pub async fn open_installer(app_handle: &AppHandle, path: String) -> Result<(), String> {
+    if !super::enabled(app_handle) {
+        return Err("DESKTOP_UPDATES_DISABLED: this Chat build uses manual desktop updates".into());
+    }
     // 更新前先停下本应用持有的 Harness 服务：安装器在安装时会强杀桌面端进程
     // （CheckIfAppIsRunning → taskkill），跳过正常退出路径的 stop_on_exit，导致
     // Harness 子进程变成孤儿继续占用配置端口。若此刻不提前停掉，更新后新实例

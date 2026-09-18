@@ -1,7 +1,9 @@
+import type { ChatSnapshot } from '@/store/modules/desktop-mode'
 import type { DshPlugin } from '@/types'
 import { useEventListener, useIntervalFn, useMount, useWatch } from '@reause/core'
 import { useQueryClient } from '@tanstack/react-query'
 import { invoke } from '@tauri-apps/api/core'
+import { getCurrentWebview } from '@tauri-apps/api/webview'
 import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { If } from 'react-if-lite'
@@ -37,6 +39,12 @@ export function App() {
     queryClient.setQueryData(queryKeys.plugins, payload)
   })
 
+  useListen<ChatSnapshot>('dsh-chat-status', ({ payload }) => store.desktopMode.receive(payload), { target: { kind: 'Webview', label: getCurrentWebview().label } })
+  useMount(() => {
+    void store.desktopMode.initialize()
+  })
+
+  const mode = useStore(store.desktopMode)
   const { t } = useTranslation()
   const { status } = useStore(store.harness)
   const { updateInfo, updating } = useStore(store.harnessUpdater)
@@ -77,8 +85,19 @@ export function App() {
     }
   })
 
+  useWatch(mode.error, () => {
+    if (mode.error)
+      toast(t('chat.operation_failed'), { variant: 'danger', description: mode.error })
+  })
+
   // 首次挂载自动启动 harness（store 内部对 StrictMode 重复挂载去重）
-  useMount(() => store.harness.startup())
+  useMount(() => {
+    if (import.meta.env.DEV && import.meta.env.VITE_DESKTOP_SMOKE === '1') {
+      void import('@/dev/desktop-smoke').then(module => module.prepareDesktopSmoke())
+      return
+    }
+    store.harness.startup()
+  })
 
   // 桌面端更新轮询：启动即检查一次，之后低频轮询；失败一律静默（不打扰用户）。
   // 发现新版本由 store 静默下载安装包，更新入口收敛到导航栏 chip 与「帮助 > 检查更新」。
@@ -147,7 +166,7 @@ export function App() {
         {coreBreakingHolder}
       </If>
       {/* 运行期插件异常：应用仍在运行，弹醒目对话框（启动崩溃走 webview 的全屏恢复页） */}
-      <If cond={status === 'ready'}>
+      <If cond={status === 'ready' && mode.selected === 'harness'}>
         <Recovery />
       </If>
     </div>

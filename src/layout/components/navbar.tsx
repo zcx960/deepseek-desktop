@@ -25,6 +25,8 @@ import { ConfigDialog } from '@/ui/dialog/config'
 import { DesktopUpdateDialog } from '@/ui/dialog/update'
 import { writeClipboardText } from '@/utils/clipboard'
 import { toast } from '@/utils/toast'
+import { ChatActions } from './chat-actions'
+import { ModeSwitch } from './mode-switch'
 
 /**
  * 壳层窗口顶部导航栏（52px，常驻）：
@@ -144,6 +146,7 @@ export interface NavbarProps {
 
 export function Navbar({ sidebarCollapsed = false, onToggleSidebar, onNewChat, onOpenFolder }: NavbarProps) {
   const { t } = useTranslation()
+  const mode = useStore(store.desktopMode)
   const isFullscreen = useMacOSFullscreen()
   // 只读取「dsh-tauri 插件是否已安装」；查询键与「插件」面板共用（同一份缓存），
   // 挂载时自动拉取，服务重启 / 插件操作后的失效由 store 与该缓存同步共同保证。
@@ -278,6 +281,10 @@ export function Navbar({ sidebarCollapsed = false, onToggleSidebar, onNewChat, o
         toast(t('update.up_to_date'), {})
     }
     catch (err) {
+      if (String(err).includes('DESKTOP_UPDATES_DISABLED')) {
+        toast(t('chat.manual_updates'), {})
+        return
+      }
       console.warn('[Navbar] check update failed:', err)
       toast(t('update.check_failed'), { variant: 'danger' })
     }
@@ -335,13 +342,14 @@ export function Navbar({ sidebarCollapsed = false, onToggleSidebar, onNewChat, o
       className={cn(
         'relative flex h-13 w-full flex-none select-none items-center gap-0.5 border-b border-line bg-panel',
         {
-          'hidden': IS_MACOS && isFullscreen,
           'pl-20 pr-1.5': IS_MACOS && !isFullscreen,
           'px-1.5': !IS_MACOS || isFullscreen,
         },
       )}
       style={{ background: dshStyle.sidebar?.background }}
     >
+      <ModeSwitch />
+      <If cond={mode.selected === 'chat'}><ChatActions /></If>
       <If cond={onToggleSidebar != null && tauriEnabled}>
         <Button
           className="rounded-lg size-7"
