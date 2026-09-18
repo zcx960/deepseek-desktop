@@ -159,10 +159,13 @@ jobs:
           - Cross-platform packaging does not verify native UI or account sign-in. Cross-origin sign-in popups open in the browser.
           - SHA256SUMS and build-info files identify each installer and its source commit.
           EOF
-          if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
-            gh release create "$RELEASE_TAG" --target "$RELEASE_SHA" --title "DeepSeek Desktop Chat · build $GITHUB_RUN_NUMBER" --notes-file release-notes.md --draft --prerelease
+          if ! gh api "repos/$GH_REPO/git/ref/tags/$RELEASE_TAG" >/dev/null 2>&1; then
+            gh api "repos/$GH_REPO/git/refs" -f ref="refs/tags/$RELEASE_TAG" -f sha="$RELEASE_SHA" >/dev/null
           fi
           actual_sha="$(gh api "repos/$GH_REPO/git/ref/tags/$RELEASE_TAG" --jq .object.sha)"
           [ "$actual_sha" = "$RELEASE_SHA" ] || { echo 'Release tag does not match source commit'; exit 1; }
+          if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" --target "$RELEASE_SHA" --title "DeepSeek Desktop Chat · build $GITHUB_RUN_NUMBER" --notes-file release-notes.md --draft --prerelease
+          fi
           gh release upload "$RELEASE_TAG" release-assets/* --clobber
           gh release edit "$RELEASE_TAG" --notes-file release-notes.md --draft=false --prerelease --latest=false
