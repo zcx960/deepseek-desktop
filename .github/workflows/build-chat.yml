@@ -30,6 +30,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter dsh-tauri build && pnpm --filter dsh-tauri-ui build
       - run: pnpm typecheck
+      - run: pnpm run lint
       - run: pnpm exec vitest run
       - run: node --test scripts/collect-chat-artifacts.test.mjs
 
