@@ -1,0 +1,167 @@
+name: Build Chat installers
+run-name: Chat installers · ${{ github.ref_name }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish_release:
+        description: Publish installers as a GitHub pre-release (main only)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: chat-installers-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-node-pnpm
+        with:
+          node-version: '24'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter dsh-tauri build && pnpm --filter dsh-tauri-ui build
+      - run: pnpm typecheck
+      - run: pnpm exec vitest run
+      - run: node --test scripts/collect-chat-artifacts.test.mjs
+
+  build:
+    name: Package (${{ matrix.id }})
+    needs: validate
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: macos-aarch64
+            os: macos-latest
+            target: aarch64-apple-darwin
+            bundles: dmg
+          - id: macos-x86_64
+            os: macos-latest
+            target: x86_64-apple-darwin
+            bundles: dmg
+          - id: windows-x86_64
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+            bundles: nsis,msi
+          - id: linux-x86_64
+            os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            bundles: appimage,deb
+    defaults:
+      run:
+        shell: bash
+    env:
+      BUILD_TARGET: ${{ matrix.target }}
+      BUILD_BUNDLES: ${{ matrix.bundles }}
+      CARGO_INCREMENTAL: '0'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-node-pnpm
+        with:
+          node-version: '24'
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87
+        with:
+          toolchain: stable
+          targets: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c
+        with:
+          workspaces: src-tauri -> target
+          key: chat-${{ matrix.target }}
+      - name: Install Linux libraries
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libxdo-dev libxtst-dev
+      - run: pnpm install --frozen-lockfile
+      - name: Prepare installer configuration
+        run: |
+          mkdir -p .temp
+          node --input-type=module <<'JS'
+          import { writeFileSync } from 'node:fs';
+          import { readReleaseIdentity } from './scripts/release-identity.mjs';
+          const { version } = readReleaseIdentity();
+          const config = process.platform === 'win32'
+            ? { bundle: { windows: { wix: { version: version.split('-')[0] } } } }
+            : {};
+          writeFileSync('.temp/chat-build.json', JSON.stringify(config));
+          JS
+      - name: Build unsigned installers
+        run: pnpm tauri build --ci --no-sign --target "$BUILD_TARGET" --bundles "$BUILD_BUNDLES" --config .temp/chat-build.json -- --locked
+      - name: Collect installers and checksums
+        run: node scripts/collect-chat-artifacts.mjs "$BUILD_TARGET" "$BUILD_BUNDLES"
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: chat-${{ matrix.id }}
+          path: .temp/chat-artifacts/*
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+  publish:
+    name: Publish Chat pre-release
+    needs: build
+    if: inputs.publish_release && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      RELEASE_SHA: ${{ github.sha }}
+      RELEASE_TAG: chat-build-${{ github.run_number }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131
+        with:
+          pattern: chat-*
+          path: release-assets
+          merge-multiple: true
+      - name: Verify all checksums and source revisions
+        working-directory: release-assets
+        run: |
+          for manifest in SHA256SUMS-*.txt; do shasum -a 256 -c "$manifest"; done
+          node --input-type=module <<'JS'
+          import { readdirSync, readFileSync } from 'node:fs';
+          const manifests = readdirSync('.').filter(name => name.startsWith('build-info-'));
+          if (manifests.length !== 4) throw new Error('Expected four platform manifests');
+          for (const manifest of manifests) {
+            const info = JSON.parse(readFileSync(manifest, 'utf8'));
+            if (info.commit !== process.env.RELEASE_SHA) throw new Error('Artifact source revision mismatch');
+          }
+          JS
+      - name: Publish installers
+        run: |
+          cat > release-notes.md <<EOF
+          Tauri-based DeepSeek Desktop Chat with Harness / official Chat switching, separate persistent Chat storage, last-mode restoration, and Chat data clearing.
+
+          Source: $RELEASE_SHA
+          Build: $RUN_URL
+
+          - macOS: Apple Silicon aarch64.dmg or Intel x64.dmg. Embedded Chat requires macOS 14+.
+          - Windows x64: .exe (NSIS) or .msi.
+          - Linux x64: .AppImage or .deb, built on Ubuntu 22.04.
+          - These installers are unsigned; macOS builds are not notarized. Desktop updates are manual.
+          - Cross-platform packaging does not verify native UI or account sign-in. Cross-origin sign-in popups open in the browser.
+          - SHA256SUMS and build-info files identify each installer and its source commit.
+          EOF
+          if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" --target "$RELEASE_SHA" --title "DeepSeek Desktop Chat · build $GITHUB_RUN_NUMBER" --notes-file release-notes.md --draft --prerelease
+          fi
+          actual_sha="$(gh api "repos/$GH_REPO/git/ref/tags/$RELEASE_TAG" --jq .object.sha)"
+          [ "$actual_sha" = "$RELEASE_SHA" ] || { echo 'Release tag does not match source commit'; exit 1; }
+          gh release upload "$RELEASE_TAG" release-assets/* --clobber
+          gh release edit "$RELEASE_TAG" --notes-file release-notes.md --draft=false --prerelease --latest=false

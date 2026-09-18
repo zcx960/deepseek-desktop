@@ -1,173 +1,81 @@
-> **Chat 增强版**：此分支基于 Tauri 桌面端 0.15.4，新增顶部 **Harness / Chat** 切换、官方 Chat 独立登录存储、恢复上次模式和清除 Chat 数据。macOS 内嵌 Chat 需要 14 或更高版本。桌面应用使用独立标识，暂不接收上游桌面自动更新；Harness 内核更新保留。详见 [Chat 使用与开发说明](docs/CHAT_MODE.md)。
+# DeepSeek Desktop Chat
 
-<p align="center">
-  <a href="https://github.com/dsh-tauri-desk/deepseek-harness-desktop">
-    <img src="public/favicon.svg" width="96" alt="DeepSeek Harness Desktop" />
-  </a>
-</p>
+[English](README.en.md) · [下载安装包](https://github.com/zcx960/deepseek-desktop/releases) · [GitHub Actions](https://github.com/zcx960/deepseek-desktop/actions/workflows/build-chat.yml)
 
-<h1 align="center">DeepSeek Harness 桌面版</h1>
+在同一个桌面窗口中使用 **Harness** 和 **DeepSeek 官方 Chat**。顶部切换模式，两边页面保持打开，未发送的输入不会因切换丢失。
 
-<p align="center">
-  在桌面上一键运行 <a href="https://github.com/deepseek-ai/deepseek-harness">DeepSeek Harness</a> ——<br />
-  无需 Node.js、无需 pnpm、无需 Docker，下载即用。
-</p>
+本项目基于 [dsh-tauri/deepseek-harness-desktop](https://github.com/dsh-tauri/deepseek-harness-desktop) 的 Tauri 2 + React 桌面端重做，基础提交为 `bd4da3aee51d65061001857e4234a8942ceca6ff`。当前版本为 `0.15.4-chat.1`，应用名称为 **DeepSeek Desktop Chat**。这是社区衍生项目，并非 DeepSeek 官方桌面客户端。
 
-<p align="center">
-  <a href="https://github.com/dsh-tauri-desk/deepseek-harness-desktop/releases">
-    <img src="https://img.shields.io/github/v/release/dsh-tauri-desk/deepseek-harness-desktop?style=flat-square&label=release&color=4D6BFE" alt="Release" />
-  </a>
-  <img src="https://img.shields.io/github/downloads/dsh-tauri-desk/deepseek-harness-desktop/total?style=flat-square&label=downloads&color=4D6BFE" alt="Downloads" />
-  <img src="https://img.shields.io/github/stars/dsh-tauri-desk/deepseek-harness-desktop?style=flat-square&label=stars&color=4D6BFE" alt="Stars" />
-  <img src="https://img.shields.io/github/license/dsh-tauri-desk/deepseek-harness-desktop?style=flat-square&label=license&color=4D6BFE" alt="MIT License" />
-  <img src="https://img.shields.io/badge/Windows%20%7C%20macOS%20%7C%20Linux-black?style=flat-square" alt="Windows | macOS | Linux" />
-  <img src="https://img.shields.io/badge/dsh-0.1.5--rc.2-4D6BFE?style=flat-square" alt="dsh 0.1.5-rc.2" />
-</p>
+## 功能
 
-<p align="center">
-  <samp><a href="./README.en.md">English</a> · <a href="./README.es.md">Español</a> · <a href="https://dshtauri.mintlify.site">文档</a> · <strong>中文</strong></samp>
-</p>
+- **Harness / Chat 切换**：Harness 保留原有内核、档案、插件和会话功能；Chat 打开 `https://chat.deepseek.com/`。
+- **独立登录存储**：Chat 使用独立持久化 WebView 存储，与 Harness 的 API Key、会话和设置分开。
+- **恢复上次模式**：重新启动后自动回到上次选择的模式。
+- **Chat 工具栏**：刷新页面、在浏览器打开、确认后清除本地 Chat 数据。
+- **独立故障处理**：Chat 加载失败时可以重试或使用浏览器，仍可切回 Harness。
+- **访问隔离**：Chat 页面不能调用桌面 Tauri 命令；其他网站的 HTTP(S) 链接交给系统浏览器。
 
-<p align="center">
- <a href="https://trendshift.io/repositories/151676?utm_source=trendshift-badge&amp;utm_medium=badge&amp;utm_campaign=badge-trendshift-151676" target="_blank" rel="noopener noreferrer"><img src="https://trendshift.io/api/badge/trendshift/repositories/151676/daily?language=Rust" alt="dsh-tauri-desk%2Fdeepseek-harness-desktop | Trendshift" width="250" height="55"/></a>
-</p>
+清除 Chat 数据会退出所有应用窗口中的 Chat 登录并清除本地 Cookie、缓存和网站存储，不会删除官网在线对话或 Harness 数据。
 
+## 下载与运行
 
-<p align="center">
-  <a href="docs/PREVIEW.md">
-    <img src="./docs/images/hero-zh.png" width="100%" alt="DSH Desktop 中文宣传横幅" />
-  </a>
-</p>
+到本仓库的 [Releases](https://github.com/zcx960/deepseek-desktop/releases) 下载名称为 **DeepSeek Desktop Chat**、标签以 `chat-build-` 开头的预发布版本。较早的 `v0.2.0` 属于旧 Electron 实现。
 
-- 🧩 **插件管理** — 插件面板管理已安装插件，出现异常时提供升级 / 卸载入口，错误详情。
-- 🎁 **内置插件** — 随安装包内置插件，以及将来引入更多高质量的内置插件。
-- 🪶 **原生轻量** — Tauri 2 外壳（非 Electron）：更小的安装包、更低的内存占用、原生窗口。
-- ⌨️ **命令行集成** — 安装自动注册 `dsh` 命令，新开终端即用；不覆盖你已有 shell 配置。
-- 🧭 **启动引导** — 首次启动可选推荐插件，也可在配置中重新选择。
-- 🚀 **自更新** — 应用内更新，不需要重新下载；
-- 🐾 **桌宠** — 提供 Pets / Codex 双来源桌宠管理，预设宠物开箱即用（直连远端素材，无需下载）、可导入 Codex `.zip` 资源包，并根据会话活动显示状态气泡。
+| 系统 | 安装包 | 要求 |
+| --- | --- | --- |
+| macOS Apple Silicon | 文件名含 `aarch64-apple-darwin` 的 `.dmg` | 内嵌 Chat 需要 macOS 14+ |
+| macOS Intel | 文件名含 `x86_64-apple-darwin` 的 `.dmg` | 内嵌 Chat 需要 macOS 14+ |
+| Windows x64 | `.exe`（NSIS）或 `.msi` | Windows 10+，WebView2 |
+| Linux x64 | `.AppImage` 或 `.deb` | 基于 Ubuntu 22.04 构建 |
 
-## 预设插件
+安装后启动应用，选择顶部 **Chat** 并自行登录 DeepSeek 账号。Chat 使用官网账号，不使用 Harness 的 API Key。Harness 按原有流程启动本地内核，首次准备运行环境需要网络；Chat 和远程模型调用也需要网络。
 
-首次启动引导中提供的插件，按需勾选安装：
+当前安装包未签名，macOS 包未经过 Apple 公证，系统可能提示无法验证开发者。桌面端采用手动更新，以避免上游安装器覆盖 Chat 功能；Harness 内核仍可在应用内更新。每次构建附带 `SHA256SUMS-*.txt` 和 `build-info-*.json`，可核对安装包校验值和源码提交。
 
-- [DSH Market](https://github.com/dsh-market/dsh-market) — 浏览、搜索并一键安装社区插件（推荐）
-- [DSH Better Sidebar](https://github.com/omdsh-dev/DSH-better-sidebar) — 类 VSCode 右侧栏，按会话隔离（推荐）
-- [DSH Rewind](https://github.com/SiriLee/dsh-rewind) — 同窗口内对话回退，从不新建会话分支；自带轻量工作区备份，回退时可一并还原文件（推荐）
+## 使用限制
 
-> 预设插件清单由桌面端维护。为避免不稳定的预设插件导致软件异常，如需新增或更新预设，请在 [deepseek-harness-desktop/issues](https://github.com/dsh-tauri-desk/deepseek-harness-desktop/issues) 提起请求。
+- macOS 14 以下可使用 Harness 和浏览器入口，不提供内嵌持久化 Chat。
+- 跨域登录弹窗交给系统浏览器，浏览器的登录状态不会自动导入应用。官网变更或限制内嵌浏览器时可能影响登录。
+- 已在 Apple Silicon 上验证模式切换、草稿保留、存储隔离、清除数据、设置弹窗和全屏，并加载官方登录页；未使用真实账号完成登录或发消息。
+- GitHub Actions 的跨平台打包成功不等于各平台原生交互已实测。完整记录见 [验证说明](docs/CHAT_MODE_QA.md)。
 
-## 内置插件
-
-随安装包资源内置的第一方插件：
-
-- [DSH Tauri](https://github.com/dsh-tauri-desk/dsh-tauri-plugins/tree/main/packages/dsh-tauri) — 提供与 Tauri 2 外壳的通信通道
-- [DSH Tauri UI](https://github.com/dsh-tauri-desk/dsh-tauri-plugins/tree/main/packages/dsh-tauri-ui) — 为 Tauri 2 外壳提供自定义设置侧边栏
-- [DSH Tauri Worktree](https://github.com/dsh-tauri-desk/dsh-tauri-plugins/tree/main/packages/dsh-tauri-worktree) — 为每个会话创建隔离的 Git Worktree，并支持检出到本地分支或归档放弃
-- [DSH Tauri Panel Extension](https://github.com/dsh-tauri-desk/dsh-tauri-plugins/tree/main/packages/dsh-tauri-panel-extension) — Skills/MCP 管理与导入技能仓库
-- [DSH Tauri Panel Scheduler](https://github.com/dsh-tauri-desk/deepseek-harness-desktop/tree/main/packages/dsh-tauri-panel-scheduler) — 创建每天、间隔、工作日或每周的定时任务；在独立 Agent 会话中执行，并保留执行记录
-- [DSH Tauri Turn Rewind](https://github.com/dsh-tauri-desk/deepseek-harness-desktop/tree/main/packages/dsh-tauri-turnrewind) — 按 Agent 回合记录私有 Git 快照、显示文件变更卡片，并在冲突保护下撤销该回合改动
-- [DSH Tauri Session](https://github.com/dsh-tauri-desk/dsh-tauri-plugins/tree/main/packages/dsh-tauri-session) — 将删除工作区改为归档，并提供支持搜索、排序、分组、项目筛选和取消归档的「已归档聊天」设置页
-- [DSH Tauri Pet](https://github.com/dsh-tauri-desk/deepseek-harness-desktop/tree/main/packages/dsh-tauri-pet) — 管理 Chat / Codex 桌宠、预设宠物下载、资源包导入和会话活动状态
-- [DSH Tauri Rightclick](https://github.com/dsh-tauri-desk/dsh-tauri-plugins/tree/main/packages/dsh-tauri-rightclick) — 为会话、工作区、正文、链接和输入框补充常用操作
-- 更多即将引入的插件...
-
-## 快速开始
-
-从 [Releases](https://github.com/dsh-tauri-desk/deepseek-harness-desktop/releases) 下载对应平台安装包，安装后启动即可。
-
-**macOS（Homebrew）：** 也可通过 Homebrew 一键安装：
-
-```bash
-brew install dsh-tauri-desk/desktop/deepseek-harness
-```
-
-首次运行会下载 Node 运行时与 Harness 内核（如已经安装 `dsh` ，则使用安装版本），随后直接进入 `http://127.0.0.1:3080` 的 Harness 界面；此后完全本地运行，无需联网。
-
-**系统要求：** Windows 10+ · macOS 10.15+ · Linux（AppImage / .deb）· 首次运行需要网络 · Harness 内核 **0.1.5-rc.1** 或更高
-
-> **Linux Wayland 注意（PikaOS / GNOME Wayland / Ubuntu 22.04+）：** AppImage 在 Wayland 下可能因 WebKitGTK 黑屏/崩溃，应用已自动处理常见情形。 <details><summary>若仍黑屏/崩溃：</summary><br>**改用 `.deb`**（已验证 PikaOS 4 Wayland），或手动 `WEBKIT_DISABLE_COMPOSITING_MODE=1 WEBKIT_DISABLE_DMABUF_RENDERER=1 GDK_BACKEND=x11 ./AppImage`。图标不显示时，将应用内 `hicolor` 图标复制到 `~/.local/share/icons` 并运行 `update-desktop-database`。<br></details>
-
-## 交流
-
-- [加入 Discord 社区](https://discord.gg/RT9As6Cj8B)
-
-<table>
-  <tr>
-    <td align="center"><strong>QQ 群</strong><br /><img src="./docs/images/community/qq-qrcode.jpg" width="360" alt="QQ 群二维码" /></td>
-    <td align="center"><strong>微信群(已满,请先加我微信) -> </strong><br /><img src="./docs/images/community/wx-qrcode.png" width="360" alt="微信群二维码" /></td>
-    <td align="center"><strong>个人微信</strong><br /><img src="https://github.com/user-attachments/assets/c1d6e493-b608-4a6d-b387-dfcaa37ccfdc" width="360" alt="微信群二维码" /></td>
-  </tr>
-</table>
-
+新版使用独立应用标识 `io.github.deepseek-desktop.chat`，不会自动迁移旧 Electron 版的桌面设置或 Chat 登录数据。Harness 数据继续遵循基底项目的 `~/.dsh` 档案规则。旧版源码仍保留在 Git 历史中。
 
 ## 开发
 
-想参与开发？参见 [docs/DEVELOPMENT.zh.md](./docs/DEVELOPMENT.zh.md)。
+需要 Node.js 24+、项目指定的 pnpm、Rust stable，以及相应平台的 Tauri 构建依赖。
 
-## 工作原理
-
-```text
-┌──────────────────────────────────────────────┐
-│ Tauri WebView (React)                        │
-│   安装状态机 → 下载进度 → iframe              │
-│   加载 dsh Web 界面 + 侧边栏控制              │
-└──────────────────────┬───────────────────────┘
-                       │ invoke 命令 + 事件
-┌──────────────────────┴───────────────────────┐
-│ Tauri Rust 后端                              │
-│   service/download  安装器 + 解压            │
-│   service/core      Harness 核心多版本管理   │
-│   service/profile   dsh 档案管理             │
-│   service/plugin    插件卸载 / 升级          │
-│   service/cli       dsh 命令 shim + PATH     │
-│   service/update    桌面端自更新             │
-│   service/workflow  dsh 进程生命周期         │
-│   task              dsh 健康检查             │
-└──────┬───────────────────────────┬───────────┘
-       │                           │
-  runtime/ (Node.js v22.22.0)   dependencies/dsh/ (发行版)
-       └─────────────┬─────────────┘
-                     ▼
-   dsh --profile <档案> --host 127.0.0.1 --port 3080
-                     │  DSH_HOME=~/.dsh
-                     ▼
-        http://127.0.0.1:3080/  ← 内嵌界面
+```sh
+git clone https://github.com/zcx960/deepseek-desktop.git
+cd deepseek-desktop
+pnpm install --frozen-lockfile
+pnpm build:plugins
+pnpm dev:desktop
 ```
 
-Harness 发行版由 [deepseek-harness-pkg](https://github.com/dsh-tauri-desk/deepseek-harness-pkg) 构建发布。每次启动都会对比最新发行版，本地过期时提醒下载更新；GitHub 不可达时保留本地安装。通过 CLI 全局安装的本地核心会被优先使用。
+```sh
+pnpm typecheck
+pnpm exec vitest run
+node --test scripts/collect-chat-artifacts.test.mjs
+cargo test --manifest-path src-tauri/Cargo.toml --lib
+pnpm tauri build --no-sign
+```
 
-## 说明
+macOS 上运行完整 Vitest 测试时使用 `TMPDIR=/private/tmp pnpm exec vitest run`，避免 Git 与 Node 对系统临时目录符号链接的解析差异。Chat 架构、本地 smoke 测试和存储实现见 [Chat 开发说明](docs/CHAT_MODE.md)。
 
-> [!WARNING]
-> **开发预览** — 上游 `dsh` 仍在快速迭代，存在破坏性变更；本项目同步跟随。
+## GitHub Actions 打包
 
-> [!NOTE]
-> **安全声明** — `dsh` 具备本地代码执行能力。仅供学习 / 研究 / 测试，请在可信、隔离的环境中使用。
+打开 [Build Chat installers](https://github.com/zcx960/deepseek-desktop/actions/workflows/build-chat.yml)，选择 **Run workflow**：
 
-## 相关项目
+1. 选择要构建的分支，默认使用 `main`。
+2. 需要发布到 Releases 时勾选 `publish_release`；仅 `main` 支持发布。
+3. 流程先执行类型检查和测试，再并行打包 macOS 两种架构、Windows x64 和 Linux x64。
+4. 四个平台产物全部完成后才发布预发布版本。仅打包时可从该次运行的 **Artifacts** 下载，保留 30 天。
 
-- [deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) — 上游 `dsh` agent 平台
-- [deepseek-harness-pkg](https://github.com/dsh-tauri-desk/deepseek-harness-pkg) — 预打包 Harness 发行版（本应用下载源）
+流程不需要 Apple 或 Windows 签名密钥，使用锁定的依赖文件构建并记录源码提交。发布采用独立的 `chat-build-<运行编号>` 标签，旧版上游签名发布流程不在此仓库执行。
 
-### 插件数据源
+## 基底与许可证
 
-插件在运行时直接引用的远端素材与上游清单：
+Tauri 外壳、Harness 安装与进程管理、内置插件等能力来自 [deepseek-harness-desktop](https://github.com/dsh-tauri/deepseek-harness-desktop)；Agent 内核来自 [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness)。本仓库在此基础上增加 Chat 模式和独立构建发布流程。
 
-- [PC2005-cloud/dsh-pet](https://github.com/PC2005-cloud/dsh-pet) — 预设桌宠素材（WebM 动作、预览 GIF、`config.jsonc`），`preset-pets.json` 固定到 `e1ff8c1`
-- [dsh-tauri-desk/dsh-pet-mov](https://github.com/dsh-tauri-desk/dsh-pet-mov) — macOS HEVC-alpha `.mov` 镜像（WKWebView 不认 VP9-alpha），固定到 `be0f3bb`
-- [hairyf/dsh-pet-component](https://github.com/hairyf/dsh-pet-component) — 桌宠渲染组件（npm `dsh-pet-component`）
-
-### 插件子仓库
-
-`source/` 下按插件需要克隆的参考仓库，多数不随本仓库提交：
-
-- [PC2005-cloud/dsh-pet](https://github.com/PC2005-cloud/dsh-pet) — 桌宠动作权重、连续播放与气泡样式（子模块）
-- [Skylarking/dsh-plugin-codex-pets](https://github.com/Skylarking/dsh-plugin-codex-pets) — Codex 宠物图集与会话状态映射（子模块）
-- [ayangweb/BongoCat](https://github.com/ayangweb/BongoCat) — Tauri 桌宠窗口、原生拖动、DPI 与鼠标穿透基准（子模块）
-- [QCYTSN/dsh-dafeiyu](https://github.com/QCYTSN/dsh-dafeiyu) — 桌宠气泡文案与状态优先级参考（子模块）
-- [Signalight/codex-to-dsh-pet](https://github.com/Signalight/codex-to-dsh-pet) — Codex v2 图集、动作优先级与会话状态映射
-
-## License
-
-[MIT](./LICENSE)，附加[非商用条款](./LICENSE.details) © deepseek-harness-desktop contributors
+保留上游 [MIT 许可证](LICENSE) 与 [禁止商业二次开发的附加条款](LICENSE.details)，以及原作者版权声明。

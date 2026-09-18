@@ -41,11 +41,12 @@ jobs:
   prepare:
     name: Prepare Release
     if: >-
+      github.repository == 'dsh-tauri/deepseek-harness-desktop' && (
       github.event_name == 'push' ||
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'pull_request' && github.event.pull_request.merged == true &&
        github.event.pull_request.head.repo.full_name == github.repository &&
-       startsWith(github.event.pull_request.head.ref, 'release/'))
+       startsWith(github.event.pull_request.head.ref, 'release/')))
     runs-on: ubuntu-latest
     outputs:
       tag: ${{ steps.meta.outputs.tag }}
